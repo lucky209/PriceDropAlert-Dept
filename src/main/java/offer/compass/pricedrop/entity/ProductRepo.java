@@ -13,6 +13,8 @@ public interface ProductRepo extends JpaRepository<Product, String> {
 
     List<Product> findByIsPicked(boolean isPicked);
 
+    List<Product> findByFilterFactorIsNotNull();
+
     @Query(value = "delete from pricedropalert.product where created_date <= ?1", nativeQuery = true)
     @Transactional
     void deleteRecordsByCreatedDate(LocalDate date);

@@ -22,4 +22,11 @@ public class PriceDropController {
         priceDropService.getProducts(departments);
         return true;
     }
+
+    @PostMapping("/price-drop-alert/download-images")
+    public boolean downloadImages(@RequestBody String dept) throws Exception {
+        log.info("Request received to shorten the url");
+        priceDropService.downloadImages(dept);
+        return true;
+    }
 }

@@ -41,6 +41,12 @@ public class PriceDropHelper {
     private PriceHistoryHelper priceHistoryHelper;
     @Autowired
     private ProductRepo productRepo;
+    @Autowired
+    private AmazonHelper amazonHelper;
+    @Autowired
+    private FlipkartHelper flipkartHelper;
+    @Autowired
+    private FileHelper fileHelper;
 
     @Value("${product.needed.count.default.value}")
     private int productNeededCount;
@@ -171,5 +177,43 @@ public class PriceDropHelper {
             pool.awaitTermination(5, TimeUnit.HOURS);
             log.info("Completed the updatePriceHistoryDetails process...");
         }
+    }
+
+    public void downloadImagesProcess(List<Product> batchEntities, String dept, int imgCount) {
+        //open tabs
+        WebDriver browser = browserHelper.openBrowser(true);
+        List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());
+        //open amazon urls in all tabs
+        for (int i=0;i<tabs.size();i++) {
+            browser.switchTo().window(tabs.get(i));
+            browser.get(batchEntities.get(i).getSiteUrl());
+        }
+        //download images
+        for (int i=0;i<tabs.size();i++) {
+            try {
+                browser.switchTo().window(tabs.get(i));
+                if (browser.getCurrentUrl().contains(PriceHistoryConstants.AMAZON_URL)) {
+                    amazonHelper.downloadAmazonImages(browser, imgCount, dept);
+                    browser.navigate().refresh();
+                    fileHelper.takeScreenshot(browser, dept, imgCount, true);
+                    if (batchEntities.get(i).getCrossSiteUrl() != null) {
+                        browser.get(batchEntities.get(i).getCrossSiteUrl());
+                        fileHelper.takeScreenshot(browser, dept, imgCount, false);
+                    }
+                } else {
+                    flipkartHelper.downloadFlipkartImages(browser, imgCount, dept);
+                    fileHelper.takeScreenshot(browser, dept, imgCount, false);
+                    if (batchEntities.get(i).getCrossSiteUrl() != null) {
+                        browser.get(batchEntities.get(i).getCrossSiteUrl());
+                        fileHelper.takeScreenshot(browser, dept, imgCount, true);
+                    }
+                }
+            } catch (Exception ex) {
+                log.info("Exception occurred for the url {}. Exception is {}", browser.getCurrentUrl(), ex.getMessage());
+                log.info("Continuing with next tab...");
+            }
+            imgCount++;
+        }
+        browser.quit();
     }
 }

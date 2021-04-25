@@ -5,14 +5,23 @@ import offer.compass.pricedrop.constant.Constant;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Component
 public class FlipkartHelper {
+
+    @Autowired
+    private FileHelper fileHelper;
 
     synchronized List<String> getFlipkartDepts(WebDriver browser) throws Exception {
         List<String> dept = new ArrayList<>();
@@ -38,5 +47,25 @@ public class FlipkartHelper {
         }
         log.info("Cannot fetch product name of the flipkart element for the url " + browser.getCurrentUrl());
         return null;
+    }
+
+    void downloadFlipkartImages(WebDriver browser, int count, String dept) throws Exception {
+        List<WebElement> liElements = browser.findElement(By.className("_2mLllQ")).findElements(
+                By.tagName(Constant.TAG_LI));
+        Actions actions = new Actions(browser);
+        for (int i = 0; i < liElements.size(); i++) {
+            actions.moveToElement(liElements.get(i)).build().perform();
+            List<WebElement> imgElements = browser.findElement(By.className("_1BweB8")).findElements(By.tagName(Constant.TAG_IMAGE));
+            if (!imgElements.isEmpty()) {
+                String imgSrc = imgElements.get(0).getAttribute(Constant.TAG_SRC);
+                URL url = new URL(imgSrc);
+                BufferedImage saveImage = ImageIO.read(url);
+                String folderPath = Constant.PATH_TO_SAVE_THUMBNAIL + dept + "-" + LocalDate.now() + Constant.UTIL_PATH_SLASH;
+                String pathToSave = folderPath + (count + 1) + "-" + (i + 1) + Constant.IMAGE_FORMAT;
+                fileHelper.createImageFromBufferedImage(saveImage, pathToSave, folderPath);
+                Thread.sleep(1500);
+            }
+        }
+        actions.moveToElement(liElements.get(0)).build().perform();
     }
 }
