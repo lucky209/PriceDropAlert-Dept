@@ -29,6 +29,7 @@ public class Product {
     private Integer highestPrice;
     private Integer lowestPrice;
     private Integer filterFactor;
+    private Integer productNo;
     private LocalDateTime createdDate;
     private Boolean isPicked;
     private Boolean isOldRecord;

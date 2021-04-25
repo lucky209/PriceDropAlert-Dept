@@ -88,5 +88,12 @@ public class PriceDropServiceImpl implements PriceDropService {
             pool.awaitTermination(5, TimeUnit.HOURS);
             log.info("Completed the shorten url process...");
         }
+        //update product number
+        log.info("Setting up the product numbers...");
+        for (int i = 0; i < productList.size(); i++) {
+            productList.get(i).setProductNo(i+1);
+            productRepo.save(productList.get(i));
+        }
+        log.info("Product number set up successfully...");
     }
 }
