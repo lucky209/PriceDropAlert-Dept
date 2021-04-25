@@ -2,15 +2,19 @@ package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
-import offer.compass.pricedrop.entity.Product;
+import offer.compass.pricedrop.entity.ProductRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Component
 @Slf4j
 public class CommonHelper {
+
+    @Autowired
+    private ProductRepo productRepo;
 
     @Value("${search.per.page}")
     private int searchCount;
@@ -29,12 +33,23 @@ public class CommonHelper {
         return Integer.parseInt(rupee);
     }
 
-    public int maxThreads(int records) {
+    int maxThreads(int records) {
         int searchPerPage = Math.min(records, searchCount);
         return records > searchPerPage ? 2:1;
     }
 
-    public boolean isFlipkartProduct(String currentUrl) {
+    boolean isFlipkartProduct(String currentUrl) {
         return currentUrl.contains("www.flipkart.com");
+    }
+
+    public void cleanupProductTable() {
+        LocalDate seventhDayFromToday = LocalDate.now().minusDays(7);
+        int count = productRepo.getRecordsCountByCreatedDate(seventhDayFromToday);
+        if (count != 0) {
+            productRepo.deleteRecordsByCreatedDate(seventhDayFromToday);
+            log.info("Deleted {} record(s)...", count);
+        }
+        else
+            log.info("Deleted 0 records...");
     }
 }

@@ -169,7 +169,7 @@ public class PriceDropHelper {
             }
             pool.shutdown();
             pool.awaitTermination(5, TimeUnit.HOURS);
-            log.info("Completed the filterByDepartments process...");
+            log.info("Completed the updatePriceHistoryDetails process...");
         }
     }
 }

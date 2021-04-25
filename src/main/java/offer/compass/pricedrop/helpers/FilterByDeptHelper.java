@@ -77,6 +77,9 @@ public class FilterByDeptHelper {
                         if (productName != null)
                             batchEntities.get(i).setProductName(productName);
                         productRepo.save(batchEntities.get(i));
+                    } else {
+                        batchEntities.get(i).setIsOldRecord(true);
+                        productRepo.save(batchEntities.get(i));
                     }
                 } catch (Exception ex) {
                     log.info("Exception occurred. Exception is {} . So continuing with next tab", ex.getMessage());
@@ -85,6 +88,7 @@ public class FilterByDeptHelper {
         } catch (Exception e) {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), e.getMessage());
         } finally {
+            log.info("Quitting the browser of thread {}", Thread.currentThread().getName());
             browser.quit();
         }
     }

@@ -71,6 +71,7 @@ public class PriceHistoryHelper {
         } catch (Exception ex) {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), ex.getMessage());
         } finally {
+            log.info("Quitting the browser of thread {}", Thread.currentThread().getName());
             browser.quit();
         }
     }
@@ -161,7 +162,6 @@ public class PriceHistoryHelper {
     }
 
     private synchronized void moveOverElementByOffset(WebElement element, int width, Actions actions) {
-//        Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
         actions.moveToElement(element, width, 0);
         actions.moveToElement(element, width, 0);
         actions.build().perform();
@@ -183,9 +183,16 @@ public class PriceHistoryHelper {
                 product.setLowestPrice(this.getLowestPrice(browser));
                 product.setRatingStar(this.getRatingStar(browser));
                 product.setFilterFactor(filterFactorValue);
-                productRepo.save(product);
+                product.setIsOldRecord(false);
+            } else {
+                product.setIsOldRecord(true);
+                product.setIsPicked(false);
             }
+        } else {
+            product.setIsOldRecord(true);
+            product.setIsPicked(false);
         }
+        productRepo.save(product);
     }
 
     private LocalDate convertPhDateToLocalDate(String phDate) {
