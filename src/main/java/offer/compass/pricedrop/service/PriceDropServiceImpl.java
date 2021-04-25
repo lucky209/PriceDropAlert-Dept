@@ -6,6 +6,7 @@ import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
 import offer.compass.pricedrop.helpers.CommonHelper;
 import offer.compass.pricedrop.helpers.PriceDropHelper;
+import offer.compass.pricedrop.helpers.ShortenUrlHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ public class PriceDropServiceImpl implements PriceDropService {
     private CommonHelper commonHelper;
     @Autowired
     private ProductRepo productRepo;
+    @Autowired
+    private ShortenUrlHelper shortenUrlHelper;
 
     @Value("${search.per.page}")
     private int searchPerPage;
@@ -55,7 +58,7 @@ public class PriceDropServiceImpl implements PriceDropService {
     public void downloadImages(String dept) throws InterruptedException {
         List<Product> productList = productRepo.findByFilterFactorIsNotNull();
         if (!productList.isEmpty()) {
-            log.info("Number of deals found from pricedrop_details table is " + productList.size());
+            log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
             int imgCount = 0;
             for (List<Product> batchEntities : Lists.partition(productList,
@@ -68,5 +71,22 @@ public class PriceDropServiceImpl implements PriceDropService {
             pool.awaitTermination(5, TimeUnit.HOURS);
         }
         log.info("Completed download images process...");
+    }
+
+    @Override
+    public void shortenUrl() throws InterruptedException {
+        List<Product> productList = productRepo.findByFilterFactorIsNotNull();
+        if (!productList.isEmpty()) {
+            log.info("Number of deals found from product table is " + productList.size());
+            ExecutorService pool = Executors.newFixedThreadPool(1);
+            for (List<Product> batchEntities : Lists.partition(productList,
+                    Math.min(productList.size(), searchPerPage))) {
+                Thread thread = new ShortenUrlProcess(batchEntities, shortenUrlHelper);
+                pool.execute(thread);
+            }
+            pool.shutdown();
+            pool.awaitTermination(5, TimeUnit.HOURS);
+            log.info("Completed the shorten url process...");
+        }
     }
 }

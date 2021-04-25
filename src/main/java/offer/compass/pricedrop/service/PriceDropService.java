@@ -7,4 +7,6 @@ public interface PriceDropService {
     void getProducts(List<String> dept) throws Exception;
 
     void downloadImages(String dept) throws InterruptedException;
+
+    void shortenUrl() throws InterruptedException;
 }
