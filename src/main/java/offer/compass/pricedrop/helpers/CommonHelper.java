@@ -43,6 +43,7 @@ public class CommonHelper {
     }
 
     public void cleanupProductTable() {
+        //clean all records of 7 days older
         LocalDate seventhDayFromToday = LocalDate.now().minusDays(7);
         int count = productRepo.getRecordsCountByCreatedDate(seventhDayFromToday);
         if (count != 0) {
@@ -51,5 +52,7 @@ public class CommonHelper {
         }
         else
             log.info("Deleted 0 records...");
+        //clean up non designed products
+        productRepo.deleteByProductNoIsNull();
     }
 }

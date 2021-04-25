@@ -158,8 +158,8 @@ public class PriceDropHelper {
             }
             pool.shutdown();
             pool.awaitTermination(5, TimeUnit.HOURS);
-            log.info("Completed the filterByDepartments process...");
         }
+        log.info("Completed the filterByDepartments process...");
     }
 
     public void updatePriceHistoryDetails() throws InterruptedException {
@@ -175,8 +175,8 @@ public class PriceDropHelper {
             }
             pool.shutdown();
             pool.awaitTermination(5, TimeUnit.HOURS);
-            log.info("Completed the updatePriceHistoryDetails process...");
         }
+        log.info("Completed the updatePriceHistoryDetails process...");
     }
 
     public void downloadImagesProcess(List<Product> batchEntities, String dept, int imgCount) {
