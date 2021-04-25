@@ -2,7 +2,6 @@ package offer.compass.pricedrop.service;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.entity.Product;
-import offer.compass.pricedrop.helpers.CommonHelper;
 import offer.compass.pricedrop.helpers.FilterByDeptHelper;
 
 import java.util.List;
