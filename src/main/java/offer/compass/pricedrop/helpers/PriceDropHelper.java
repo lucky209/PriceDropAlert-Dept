@@ -208,6 +208,8 @@ public class PriceDropHelper {
                         fileHelper.takeScreenshot(browser, dept, imgCount, true);
                     }
                 }
+                batchEntities.get(i).setProductNo(imgCount+1);
+                productRepo.save(batchEntities.get(i));
             } catch (Exception ex) {
                 log.info("Exception occurred for the url {}. Exception is {}", browser.getCurrentUrl(), ex.getMessage());
                 log.info("Continuing with next tab...");
