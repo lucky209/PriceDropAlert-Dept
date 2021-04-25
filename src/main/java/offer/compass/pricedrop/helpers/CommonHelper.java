@@ -19,7 +19,7 @@ public class CommonHelper {
     @Value("${search.per.page}")
     private int searchCount;
 
-    public int convertStringRupeeToInteger(String rupee) {
+    int convertStringRupeeToInteger(String rupee) {
         rupee = rupee
                 .replace(Constant.UTIL_RUPEE, Constant.UTIL_EMPTY_QUOTE)
                 .replaceAll(Constant.UTIL_COMMA, Constant.UTIL_EMPTY_QUOTE);
