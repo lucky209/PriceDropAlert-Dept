@@ -12,5 +12,7 @@ public interface PriceDropService {
 
     void shortenUrl() throws InterruptedException;
 
-    void getTextDetails(String dept) throws FileNotFoundException, UnsupportedEncodingException, Exception;
+    void getTextDetails(String dept) throws Exception;
+
+    void makeCanvaDesign() throws Exception;
 }

@@ -3,8 +3,12 @@ package offer.compass.pricedrop.service;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
+import offer.compass.pricedrop.constant.PropertyConstants;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
+import offer.compass.pricedrop.entity.Property;
+import offer.compass.pricedrop.entity.PropertyRepo;
+import offer.compass.pricedrop.helpers.CanvaHelper;
 import offer.compass.pricedrop.helpers.CommonHelper;
 import offer.compass.pricedrop.helpers.PriceDropHelper;
 import offer.compass.pricedrop.helpers.ShortenUrlHelper;
@@ -13,13 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,6 +40,10 @@ public class PriceDropServiceImpl implements PriceDropService {
     private ProductRepo productRepo;
     @Autowired
     private ShortenUrlHelper shortenUrlHelper;
+    @Autowired
+    private PropertyRepo propertyRepo;
+    @Autowired
+    private CanvaHelper canvaHelper;
 
     @Value("${search.per.page}")
     private int searchPerPage;
@@ -98,7 +109,8 @@ public class PriceDropServiceImpl implements PriceDropService {
     @Override
     public void getTextDetails(String dept) throws Exception {
         String mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + dept + "-" + LocalDate.now() + ".txt";
-        List<Product> youtubeDescList = productRepo.findByFilterFactorIsNotNull();
+        List<Product> youtubeDescList = productRepo.findByFilterFactorIsNotNull()
+                .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
         //write youtube desc text file
         PrintWriter writerDesc = new PrintWriter(mainPath, "UTF-8");
         for (Product priceDropDetail : youtubeDescList) {
@@ -144,5 +156,21 @@ public class PriceDropServiceImpl implements PriceDropService {
         }
         writerVoiceDesc.close();
         log.info("Voice details is printed successfully...");
+    }
+
+    @Override
+    @Transactional
+    public void makeCanvaDesign() throws Exception {
+        List<Product> canvaList = productRepo.findByFilterFactorIsNotNull()
+                .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
+        log.info("Number of deals found from product table is " + canvaList.size());
+        Property property = propertyRepo.findByPropName(PropertyConstants.HEADLESS_MODE);
+        if (!canvaList.isEmpty()) {
+            property.setEnabled(false);
+            propertyRepo.save(property);
+            canvaHelper.makeCanvaDesign(canvaList);
+            property.setEnabled(true);
+            propertyRepo.save(property);
+        }
     }
 }

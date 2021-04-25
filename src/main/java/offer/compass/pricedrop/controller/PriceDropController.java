@@ -3,6 +3,7 @@ package offer.compass.pricedrop.controller;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.service.PriceDropService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,13 @@ public class PriceDropController {
     public boolean getTextDetails(@RequestBody String dept) throws Exception {
         log.info("Request received get Text Details");
         priceDropService.getTextDetails(dept);
+        return true;
+    }
+
+    @GetMapping("/price-drop-alert/canva-design")
+    public boolean makeCanvaDesign() throws Exception {
+        log.info("Request received to make canva design");
+        priceDropService.makeCanvaDesign();
         return true;
     }
 }
