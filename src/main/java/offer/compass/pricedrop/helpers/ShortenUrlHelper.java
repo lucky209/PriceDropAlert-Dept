@@ -2,7 +2,6 @@ package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
-import offer.compass.pricedrop.constant.PriceHistoryConstants;
 import offer.compass.pricedrop.constant.PropertyConstants;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
@@ -34,7 +33,7 @@ public class ShortenUrlHelper {
     private ProductRepo productRepo;
 
     @Transactional
-    public void shortenUrlProcess(List<Product> batchEntities, boolean isCrossSiteUrl) throws InterruptedException {
+    public void shortenUrlProcess(List<Product> batchEntities) throws InterruptedException {
         //turn off headless mode
         Property property = propertyRepo.findByPropName(PropertyConstants.HEADLESS_MODE);
         property.setEnabled(false);
@@ -55,37 +54,14 @@ public class ShortenUrlHelper {
         }
         //click short url button and copy & save
         for (int i=0;i<tabs.size();i++) {
-            boolean isSendKeys = false;
             browser.switchTo().window(tabs.get(i));
             try {
-                if (!isCrossSiteUrl) {
-                    browser.findElement(By.id(Constant.LONG_URL_TEXT_BOX_ID)).sendKeys(batchEntities.get(i).getSiteUrl());
-                    isSendKeys = true;
-                } else {
-                    if (batchEntities.get(i).getCrossSiteUrl() != null) {
-                        browser.findElement(By.id(Constant.LONG_URL_TEXT_BOX_ID)).sendKeys(batchEntities.get(i).getCrossSiteUrl());
-                        isSendKeys = true;
-                    }
-                }
-                if (isSendKeys) {
-                    browser.findElement(By.id(Constant.SHORTEN_BUTTON_ID)).click();
-                    Thread.sleep(600);
-                    String copiedUrl = this.clickCopyButtonAndGetUrl(browser);
-                    if (!isCrossSiteUrl) {
-                        if (batchEntities.get(i).getSiteUrl().contains(PriceHistoryConstants.AMAZON_URL)) {
-                            batchEntities.get(i).setShortenUrl(copiedUrl);
-                        } else {
-                            batchEntities.get(i).setCrossSiteShortenUrl(copiedUrl);
-                        }
-                    } else {
-                        if (batchEntities.get(i).getCrossSiteUrl().contains(PriceHistoryConstants.AMAZON_URL)) {
-                            batchEntities.get(i).setShortenUrl(copiedUrl);
-                        } else {
-                            batchEntities.get(i).setCrossSiteShortenUrl(copiedUrl);
-                        }
-                    }
-                    productRepo.save(batchEntities.get(i));
-                }
+                browser.findElement(By.id(Constant.LONG_URL_TEXT_BOX_ID)).sendKeys(batchEntities.get(i).getSiteUrl());
+                browser.findElement(By.id(Constant.SHORTEN_BUTTON_ID)).click();
+                Thread.sleep(600);
+                String copiedUrl = this.clickCopyButtonAndGetUrl(browser);
+                batchEntities.get(i).setShortenUrl(copiedUrl);
+                productRepo.save(batchEntities.get(i));
             } catch (Exception ex) {
                 log.info("Exception occurred for the url {}. Exception is {}", browser.getCurrentUrl(), ex.getMessage());
                 log.info("Continuing with next tab...");

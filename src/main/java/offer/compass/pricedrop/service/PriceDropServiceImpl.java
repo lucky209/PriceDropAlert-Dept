@@ -2,19 +2,28 @@ package offer.compass.pricedrop.service;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import offer.compass.pricedrop.constant.Constant;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
 import offer.compass.pricedrop.helpers.CommonHelper;
 import offer.compass.pricedrop.helpers.PriceDropHelper;
 import offer.compass.pricedrop.helpers.ShortenUrlHelper;
+import offer.compass.pricedrop.model.VoiceTextDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -88,5 +97,56 @@ public class PriceDropServiceImpl implements PriceDropService {
             pool.awaitTermination(5, TimeUnit.HOURS);
             log.info("Completed the shorten url process...");
         }
+    }
+
+    @Override
+    public void getTextDetails(String dept) throws Exception {
+        String mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + dept + "-" + LocalDate.now() + ".txt";
+        List<Product> youtubeDescList = productRepo.findByFilterFactorIsNotNull();
+        //write youtube desc text file
+        PrintWriter writerDesc = new PrintWriter(mainPath, "UTF-8");
+        for (Product priceDropDetail : youtubeDescList) {
+            if (priceDropDetail.getShortenUrl() != null) {
+                writerDesc.println(priceDropDetail.getProductNo() + ". " + priceDropDetail.getProductName());
+                writerDesc.println("Url -- " + priceDropDetail.getShortenUrl());
+                writerDesc.println();
+            }
+        }
+        writerDesc.close();
+        log.info("Description is printed successfully...");
+        List<VoiceTextDetails> voiceDetailsTextList = new ArrayList<>();
+        for (Product priceDropDetail : youtubeDescList) {
+            VoiceTextDetails voiceTextDetails = new VoiceTextDetails();
+            voiceTextDetails.setDropChances(priceDropDetail.getDropChances());
+            voiceTextDetails.setHighestPrice(priceDropDetail.getHighestPrice());
+            voiceTextDetails.setLowestPrice(priceDropDetail.getLowestPrice());
+            voiceTextDetails.setPhUrl(priceDropDetail.getPriceHistoryLink());
+            voiceTextDetails.setPricedropFromDate(priceDropDetail.getPricedropFromDate());
+            voiceTextDetails.setPricedropFromPrice(priceDropDetail.getPricedropFromPrice());
+            voiceTextDetails.setPricedropToPrice(priceDropDetail.getPrice());
+            voiceTextDetails.setProductName(priceDropDetail.getProductName());
+            voiceTextDetails.setProductNo(priceDropDetail.getProductNo());
+            voiceTextDetails.setRatingStar(priceDropDetail.getRatingStar());
+            voiceTextDetails.setUrl(priceDropDetail.getSiteUrl());
+            voiceDetailsTextList.add(voiceTextDetails);
+        }
+        mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + dept + "-VoiceText-" + LocalDate.now() + ".txt";
+        PrintWriter writerVoiceDesc = new PrintWriter(mainPath, "UTF-8");
+        for (VoiceTextDetails voiceTextDetail : voiceDetailsTextList) {
+            writerVoiceDesc.println(voiceTextDetail.getProductNo() + "."
+                    + voiceTextDetail.getProductName() + "--" + voiceTextDetail.getSiteName());
+            writerVoiceDesc.println("Product url -- " + voiceTextDetail.getUrl());
+            writerVoiceDesc.println("Price history url -- " + voiceTextDetail.getPhUrl());
+            writerVoiceDesc.println("Lowest price -- " + voiceTextDetail.getLowestPrice());
+            writerVoiceDesc.println("Highest price -- " + voiceTextDetail.getHighestPrice());
+            writerVoiceDesc.println("Today's price -- " + voiceTextDetail.getPricedropToPrice());
+            writerVoiceDesc.println("From price -- " + voiceTextDetail.getPricedropFromPrice() +
+                    "  From date -- " + voiceTextDetail.getPricedropFromDate());
+            writerVoiceDesc.println("Drop chances -- " + voiceTextDetail.getDropChances());
+            writerVoiceDesc.println("Rating star -- " + voiceTextDetail.getRatingStar());
+            writerVoiceDesc.println();
+        }
+        writerVoiceDesc.close();
+        log.info("Voice details is printed successfully...");
     }
 }

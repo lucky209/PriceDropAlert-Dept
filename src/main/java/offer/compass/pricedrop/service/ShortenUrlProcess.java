@@ -21,7 +21,7 @@ public class ShortenUrlProcess extends Thread {
     public void run() {
         log.info("::: " + Thread.currentThread().getName() + " is started...");
         try {
-            helper.shortenUrlProcess(batchEntities, false);
+            helper.shortenUrlProcess(batchEntities);
         } catch (Exception ex) {
             log.info("Exception occurred. Exception is " + ex.getMessage());
         }

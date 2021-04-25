@@ -36,4 +36,11 @@ public class PriceDropController {
         priceDropService.shortenUrl();
         return true;
     }
+
+    @PostMapping("/price-drop-alert/text-details")
+    public boolean getTextDetails(@RequestBody String dept) throws Exception {
+        log.info("Request received get Text Details");
+        priceDropService.getTextDetails(dept);
+        return true;
+    }
 }
