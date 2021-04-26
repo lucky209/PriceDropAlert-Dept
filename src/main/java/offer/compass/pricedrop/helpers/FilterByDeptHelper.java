@@ -72,13 +72,14 @@ public class FilterByDeptHelper {
                             productName = amazonHelper.getAmazonProductName(browser);
                         batchEntities.get(i).setDepartment(prodDept);
                         batchEntities.get(i).setIsPicked(true);
+                        batchEntities.get(i).setIsOldRecord(false);
                         batchEntities.get(i).setSiteUrl(browser.getCurrentUrl());
                         if (productName != null)
                             batchEntities.get(i).setProductName(productName);
                         productRepo.save(batchEntities.get(i));
                     } else {
-                        batchEntities.get(i).setIsOldRecord(true);
-                        productRepo.save(batchEntities.get(i));
+                        productRepo.deleteByProductNameAndUrl(batchEntities.get(i).getProductName(),
+                                batchEntities.get(i).getUrl());
                     }
                 } catch (Exception ex) {
                     log.info("Exception occurred. Exception is {} . So continuing with next tab", ex.getMessage());

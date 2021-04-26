@@ -61,17 +61,27 @@ public class AmazonHelper {
         browser.findElement(By.id(Constant.IMAGE_ID)).click();
         Thread.sleep(1000);
         List<WebElement> thumbnailElements = browser.findElements(By.cssSelector(Constant.THUMBNAILS_CSS_SELECTOR));
-        for (int j = 0; j < thumbnailElements.size(); j++) {
-            browser.findElement(By.id("ivImage_" + j)).click();
-            Thread.sleep(1500);
-            this.downloadAndSaveAmazonProductImage(browser, (count+1) + "-" + (j+1) + Constant.IMAGE_FORMAT, dept);
+        if (thumbnailElements.size() > 1) {
+            for (int j = 0; j < thumbnailElements.size(); j++) {
+                browser.findElement(By.id("ivImage_" + j)).click();
+                Thread.sleep(1500);
+                this.downloadAndSaveAmazonProductImage(browser,
+                        (count + 1) + "-" + (j + 1) + Constant.IMAGE_FORMAT, dept, true);
+            }
+        } else {
+            this.downloadAndSaveAmazonProductImage(browser,
+                    (count + 1) + "-1" + Constant.IMAGE_FORMAT, dept, false);
         }
     }
 
-    private void downloadAndSaveAmazonProductImage(WebDriver browser, String imgName, String dept) throws Exception {
+    private void downloadAndSaveAmazonProductImage(WebDriver browser, String imgName, String dept, boolean multiple) throws Exception {
         String folderPath = Constant.PATH_TO_SAVE_THUMBNAIL + dept + "-" + LocalDate.now() + Constant.UTIL_PATH_SLASH;
         String pathToSave = folderPath + imgName;
-        WebElement imgElement = browser.findElement(By.id(Constant.THUMBNAIL_ID)).findElement(By.tagName(Constant.TAG_IMAGE));
+        WebElement imgElement;
+        if (multiple)
+            imgElement = browser.findElement(By.id(Constant.THUMBNAIL_ID)).findElement(By.tagName(Constant.TAG_IMAGE));
+        else
+            imgElement = browser.findElement(By.id("imgTagWrapperId")).findElement(By.tagName(Constant.TAG_IMAGE));
         String imgSrc = imgElement.getAttribute(Constant.TAG_SRC);
         URL url = new URL(imgSrc);
         BufferedImage saveImage = ImageIO.read(url);

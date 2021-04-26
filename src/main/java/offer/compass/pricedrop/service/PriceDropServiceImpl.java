@@ -72,7 +72,7 @@ public class PriceDropServiceImpl implements PriceDropService {
 
     @Override
     public void downloadImages(String dept) throws InterruptedException {
-        List<Product> productList = productRepo.findByFilterFactorIsNotNull();
+        List<Product> productList = productRepo.findByIsPickedAndIsOldRecord(true, false);
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -91,7 +91,7 @@ public class PriceDropServiceImpl implements PriceDropService {
 
     @Override
     public void shortenUrl() throws InterruptedException {
-        List<Product> productList = productRepo.findByFilterFactorIsNotNull();
+        List<Product> productList = productRepo.findByIsPickedAndIsOldRecord(true, false);
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -107,9 +107,25 @@ public class PriceDropServiceImpl implements PriceDropService {
     }
 
     @Override
+    @Transactional
+    public void makeCanvaDesign() throws Exception {
+        List<Product> canvaList = productRepo.findByIsPickedAndIsOldRecord(true, false)
+                .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
+        log.info("Number of deals found from product table is " + canvaList.size());
+        Property property = propertyRepo.findByPropName(PropertyConstants.HEADLESS_MODE);
+        if (!canvaList.isEmpty()) {
+            property.setEnabled(false);
+            propertyRepo.save(property);
+            canvaHelper.makeCanvaDesign(canvaList);
+            property.setEnabled(true);
+            propertyRepo.save(property);
+        }
+    }
+
+    @Override
     public void getTextDetails(String dept) throws Exception {
         String mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + dept + "-" + LocalDate.now() + ".txt";
-        List<Product> youtubeDescList = productRepo.findByFilterFactorIsNotNull()
+        List<Product> youtubeDescList = productRepo.findByIsPickedAndIsOldRecord(true, false)
                 .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
         //write youtube desc text file
         PrintWriter writerDesc = new PrintWriter(mainPath, "UTF-8");
@@ -156,21 +172,7 @@ public class PriceDropServiceImpl implements PriceDropService {
         }
         writerVoiceDesc.close();
         log.info("Voice details is printed successfully...");
-    }
-
-    @Override
-    @Transactional
-    public void makeCanvaDesign() throws Exception {
-        List<Product> canvaList = productRepo.findByFilterFactorIsNotNull()
-                .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
-        log.info("Number of deals found from product table is " + canvaList.size());
-        Property property = propertyRepo.findByPropName(PropertyConstants.HEADLESS_MODE);
-        if (!canvaList.isEmpty()) {
-            property.setEnabled(false);
-            propertyRepo.save(property);
-            canvaHelper.makeCanvaDesign(canvaList);
-            property.setEnabled(true);
-            propertyRepo.save(property);
-        }
+        //update all products to old records
+        productRepo.updateAllRecordsToOld();
     }
 }

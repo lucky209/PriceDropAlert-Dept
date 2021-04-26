@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.CanvaConstant;
 import offer.compass.pricedrop.constant.Constant;
 import offer.compass.pricedrop.entity.Product;
-import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,20 +82,20 @@ public class CanvaHelper {
         ((JavascriptExecutor) browser).executeScript("arguments[0].scrollIntoView(true);", templateDivElement);
         Thread.sleep(2000);
         List<WebElement> components = templateDivElement.findElements(By.className(CanvaConstant.SINGLE_TEMPLATE_CLASS_NAME));
-        String productName = components.get(3).getText();
-        String todayPrice = components.get(7).getText();
-        String priceDropFromPrice = components.get(8).getText();
-        String priceDropFromDate = components.get(9).getText();
+        String productName = components.get(4).getText();
+        String todayPrice = components.get(8).getText();
+        String priceDropFromPrice = components.get(9).getText();
+        String priceDropFromDate = components.get(12).getText();
         Actions actions = new Actions(browser);
         //update title
-        this.updateText(components.get(3), actions, StringUtils.capitalize(product.getProductName()), productName);
+        this.updateText(components.get(4), actions, product.getProductName(), productName);
         //update todays price
-        this.updateText(components.get(7), actions, convertToIndianNumberFormat(product.getPrice())+"/-", todayPrice);
+        this.updateText(components.get(8), actions, convertToIndianNumberFormat(product.getPrice())+"/-", todayPrice);
         //update price drop price
-        this.updateText(components.get(8), actions, convertToIndianNumberFormat(product.getPricedropFromPrice())+"/-",
+        this.updateText(components.get(9), actions, convertToIndianNumberFormat(product.getPricedropFromPrice())+"/-",
                 priceDropFromPrice);
         //update price drop date
-        this.updateText(components.get(9), actions, this.convertToCanvaDesignDate(product.getPricedropFromDate()),
+        this.updateText(components.get(12), actions, this.convertToCanvaDesignDate(product.getPricedropFromDate()),
                 priceDropFromDate);
         Thread.sleep(2000);
     }

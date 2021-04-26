@@ -1,6 +1,7 @@
 package offer.compass.pricedrop.entity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
@@ -13,10 +14,10 @@ public interface ProductRepo extends JpaRepository<Product, String> {
 
     List<Product> findByIsPicked(boolean isPicked);
 
-    List<Product> findByFilterFactorIsNotNull();
+    List<Product> findByIsPickedAndIsOldRecord(boolean isPicked, boolean isOldRecord);
 
     @Transactional
-    void deleteByProductNoIsNull();
+    void deleteByProductNameAndUrl(String prodName, String url);
 
     @Query(value = "delete from pricedropalert.product where created_date <= ?1", nativeQuery = true)
     @Transactional
@@ -29,4 +30,9 @@ public interface ProductRepo extends JpaRepository<Product, String> {
     @Query(value = "SELECT * FROM pricedropalert.product p ORDER BY p.created_date desc LIMIT ?1", nativeQuery = true)
     @Transactional
     List<Product> fetchLastAttemptCurrentDeals(int lastAttemptDealsCount);
+
+    @Transactional
+    @Modifying
+    @Query(value = "update pricedropalert.product set is_old_record = true where is_old_record = false ", nativeQuery = true)
+    void updateAllRecordsToOld();
 }

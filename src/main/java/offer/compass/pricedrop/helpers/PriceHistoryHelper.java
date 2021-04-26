@@ -182,15 +182,16 @@ public class PriceHistoryHelper {
                 product.setRatingStar(this.getRatingStar(browser));
                 product.setFilterFactor(filterFactorValue);
                 product.setIsOldRecord(false);
+                productRepo.save(product);
             } else {
-                product.setIsOldRecord(true);
-                product.setIsPicked(false);
+                productRepo.deleteByProductNameAndUrl(product.getProductName(),
+                        product.getUrl());
             }
         } else {
-            product.setIsOldRecord(true);
-            product.setIsPicked(false);
+            productRepo.deleteByProductNameAndUrl(product.getProductName(),
+                    product.getUrl());
         }
-        productRepo.save(product);
+
     }
 
     private LocalDate convertPhDateToLocalDate(String phDate) {

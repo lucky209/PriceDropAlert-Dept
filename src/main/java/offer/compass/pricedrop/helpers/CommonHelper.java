@@ -52,7 +52,5 @@ public class CommonHelper {
         }
         else
             log.info("Deleted 0 records...");
-        //clean up non designed products
-        productRepo.deleteByProductNoIsNull();
     }
 }
