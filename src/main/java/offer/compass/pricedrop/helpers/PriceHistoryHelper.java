@@ -63,6 +63,8 @@ public class PriceHistoryHelper {
                         this.fetchDropDetails(browser, actions, batchEntities.get(i));
                     } catch (Exception e) {
                         log.info("Exception occurred again for the url {} . Moving to next tab.", browser.getCurrentUrl());
+                        productRepo.deleteByProductNameAndUrl(batchEntities.get(i).getProductName(),
+                                batchEntities.get(i).getUrl());
                     }
                 }
             }

@@ -43,6 +43,7 @@ public class FilterByDeptHelper {
                 String prodDept = null;String productName;List<String> productDepts;
                 try {
                     browser.switchTo().window(tabs.get(i));
+                    Thread.sleep(500);
                     isFlipkart = commonHelper.isFlipkartProduct(browser.getCurrentUrl());
                     if (isFlipkart) {
                         productDepts = flipkartHelper.getFlipkartDepts(browser);
@@ -83,6 +84,8 @@ public class FilterByDeptHelper {
                     }
                 } catch (Exception ex) {
                     log.info("Exception occurred. Exception is {} . So continuing with next tab", ex.getMessage());
+                    productRepo.deleteByProductNameAndUrl(batchEntities.get(i).getProductName(),
+                            batchEntities.get(i).getUrl());
                 }
             }
         } catch (Exception e) {
