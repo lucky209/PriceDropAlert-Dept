@@ -68,6 +68,8 @@ public class PriceDropServiceImpl implements PriceDropService {
         // run price history graph process and fetch final products
         log.info("Starting to update price history details...");
         priceDropHelper.updatePriceHistoryDetails();
+        // delete products which doesnt have filter factor value
+        productRepo.deleteByProductNoIsNull();
     }
 
     @Override
