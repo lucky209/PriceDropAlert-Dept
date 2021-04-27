@@ -53,6 +53,8 @@ public class PriceDropServiceImpl implements PriceDropService {
     public void getProducts(List<String> departments) throws Exception {
         //cleanup data before 7 days
         commonHelper.cleanupProductTable();
+        //update all records to old
+        productRepo.updateAllRecordsToOld();
         Thread.sleep(3000);
 
         // fetch products from price history
