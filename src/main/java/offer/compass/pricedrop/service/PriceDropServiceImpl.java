@@ -69,7 +69,7 @@ public class PriceDropServiceImpl implements PriceDropService {
         log.info("Starting to update price history details...");
         priceDropHelper.updatePriceHistoryDetails();
         // delete products which doesnt have filter factor value
-        productRepo.deleteByProductNoIsNull();
+        productRepo.deleteByFilterFactorIsNull();
     }
 
     @Override
