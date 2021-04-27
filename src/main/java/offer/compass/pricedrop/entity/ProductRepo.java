@@ -14,7 +14,7 @@ public interface ProductRepo extends JpaRepository<Product, String> {
 
     List<Product> findByIsPicked(boolean isPicked);
 
-    List<Product> findByIsPickedAndIsOldRecord(boolean isPicked, boolean isOldRecord);
+    List<Product> findByIsPickedAndIsOldRecordAndDepartment(boolean isPicked, boolean isOldRecord, String dept);
 
     @Transactional
     void deleteByProductNameAndUrl(String prodName, String url);

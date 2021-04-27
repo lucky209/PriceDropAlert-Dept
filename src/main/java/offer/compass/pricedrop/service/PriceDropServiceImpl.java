@@ -74,7 +74,8 @@ public class PriceDropServiceImpl implements PriceDropService {
 
     @Override
     public void downloadImages(String dept) throws InterruptedException {
-        List<Product> productList = productRepo.findByIsPickedAndIsOldRecord(true, false);
+        List<Product> productList =
+                productRepo.findByIsPickedAndIsOldRecordAndDepartment(true, false, dept);
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -92,8 +93,9 @@ public class PriceDropServiceImpl implements PriceDropService {
     }
 
     @Override
-    public void shortenUrl() throws InterruptedException {
-        List<Product> productList = productRepo.findByIsPickedAndIsOldRecord(true, false);
+    public void shortenUrl(String dept) throws InterruptedException {
+        List<Product> productList =
+                productRepo.findByIsPickedAndIsOldRecordAndDepartment(true, false, dept);
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -110,8 +112,9 @@ public class PriceDropServiceImpl implements PriceDropService {
 
     @Override
     @Transactional
-    public void makeCanvaDesign() throws Exception {
-        List<Product> canvaList = productRepo.findByIsPickedAndIsOldRecord(true, false)
+    public void makeCanvaDesign(String dept) throws Exception {
+        List<Product> canvaList =
+                productRepo.findByIsPickedAndIsOldRecordAndDepartment(true, false, dept)
                 .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
         log.info("Number of deals found from product table is " + canvaList.size());
         Property property = propertyRepo.findByPropName(PropertyConstants.HEADLESS_MODE);
@@ -127,7 +130,8 @@ public class PriceDropServiceImpl implements PriceDropService {
     @Override
     public void getTextDetails(String dept) throws Exception {
         String mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + dept + "-" + LocalDate.now() + ".txt";
-        List<Product> youtubeDescList = productRepo.findByIsPickedAndIsOldRecord(true, false)
+        List<Product> youtubeDescList =
+                productRepo.findByIsPickedAndIsOldRecordAndDepartment(true, false, dept)
                 .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
         //write youtube desc text file
         PrintWriter writerDesc = new PrintWriter(mainPath, "UTF-8");

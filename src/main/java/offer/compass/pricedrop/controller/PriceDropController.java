@@ -32,9 +32,9 @@ public class PriceDropController {
     }
 
     @PostMapping("/price-drop-alert/shorten-url")
-    public boolean shortenUrl() throws Exception {
+    public boolean shortenUrl(@RequestBody String dept) throws Exception {
         log.info("Request received to shorten the url");
-        priceDropService.shortenUrl();
+        priceDropService.shortenUrl(dept);
         return true;
     }
 
@@ -46,9 +46,9 @@ public class PriceDropController {
     }
 
     @GetMapping("/price-drop-alert/canva-design")
-    public boolean makeCanvaDesign() throws Exception {
+    public boolean makeCanvaDesign(@RequestBody String dept) throws Exception {
         log.info("Request received to make canva design");
-        priceDropService.makeCanvaDesign();
+        priceDropService.makeCanvaDesign(dept);
         return true;
     }
 }

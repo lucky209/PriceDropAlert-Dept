@@ -10,9 +10,9 @@ public interface PriceDropService {
 
     void downloadImages(String dept) throws InterruptedException;
 
-    void shortenUrl() throws InterruptedException;
+    void shortenUrl(String dept) throws InterruptedException;
 
     void getTextDetails(String dept) throws Exception;
 
-    void makeCanvaDesign() throws Exception;
+    void makeCanvaDesign(String dept) throws Exception;
 }
