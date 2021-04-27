@@ -178,7 +178,5 @@ public class PriceDropServiceImpl implements PriceDropService {
         }
         writerVoiceDesc.close();
         log.info("Voice details is printed successfully...");
-        //update all products to old records
-        productRepo.updateAllRecordsToOld();
     }
 }
