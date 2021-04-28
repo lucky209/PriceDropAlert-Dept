@@ -88,9 +88,10 @@ public class PriceDropHelper {
                 log.info("No product elements found");
             //saving in current deal table
             log.info("Saving the products in the table...");
+            log.info("Products found was {}", productElements.size());
             String productName; String url; int price; String priceHistoryUrl;int saveCount=0;
-            for (int i = 0; i < productNeededCount; i++) {
-                WebElement elementProductName = productElements.get(i).findElement(By.cssSelector(
+            for (WebElement productElement : productElements) {
+                WebElement elementProductName = productElement.findElement(By.cssSelector(
                         PriceHistoryConstants.PRODUCT_NAME_CSS_SELECTOR));
                 if (elementProductName != null) {
                     productName = elementProductName.getText().trim();
@@ -99,9 +100,9 @@ public class PriceDropHelper {
                                 .getAttribute(Constant.ATTRIBUTE_HREF);
                         if (url.contains(PriceHistoryConstants.AMAZON_URL) ||
                                 url.contains(PriceHistoryConstants.FLIPKART_URL)) {
-                            price = commonHelper.convertStringRupeeToInteger(productElements.get(i).findElement(
+                            price = commonHelper.convertStringRupeeToInteger(productElement.findElement(
                                     By.className(PriceHistoryConstants.PRICE_CLASS)).getText().trim());
-                            priceHistoryUrl = productElements.get(i).findElement(By.className(
+                            priceHistoryUrl = productElement.findElement(By.className(
                                     PriceHistoryConstants.PRICE_HISTORY_URL_CLASS))
                                     .getAttribute(Constant.ATTRIBUTE_HREF);
                             Product product = productRepo.findByProductNameAndUrl(productName, url);
