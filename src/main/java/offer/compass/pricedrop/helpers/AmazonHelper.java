@@ -23,6 +23,8 @@ public class AmazonHelper {
 
     @Autowired
     private FileHelper fileHelper;
+    @Autowired
+    private CommonHelper commonHelper;
 
     synchronized List<String> getAmazonDepartments(WebDriver browser) {
         List<String> dept = new ArrayList<>();
@@ -93,5 +95,20 @@ public class AmazonHelper {
         BufferedImage saveImage = ImageIO.read(url);
         fileHelper.createImageFromBufferedImage(saveImage, pathToSave, folderPath);
         Thread.sleep(1500);
+    }
+
+    public Integer getPrice(WebDriver browser) {
+        boolean isPriceAvailable = !browser.findElements(By.id("priceblock_dealprice")).isEmpty();
+        if (isPriceAvailable) {
+            return commonHelper.convertStringRupeeToInteger(browser.findElement(By.id("priceblock_dealprice"))
+                    .getText().trim().split("\\.")[0]);
+        } else {
+            isPriceAvailable = !browser.findElements(By.id("priceblock_ourprice")).isEmpty();
+            if (isPriceAvailable) {
+                return commonHelper.convertStringRupeeToInteger(browser.findElement(By.id("priceblock_ourprice"))
+                        .getText().trim().split("\\.")[0]);
+            }
+        }
+        return null;
     }
 }

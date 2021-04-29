@@ -24,6 +24,8 @@ public class FlipkartHelper {
 
     @Autowired
     private FileHelper fileHelper;
+    @Autowired
+    private CommonHelper commonHelper;
 
     synchronized List<String> getFlipkartDepts(WebDriver browser) {
         List<String> dept = new ArrayList<>();
@@ -74,5 +76,14 @@ public class FlipkartHelper {
             }
         }
         actions.moveToElement(liElements.get(0)).build().perform();
+    }
+
+    public Integer getPrice(WebDriver browser) {
+        boolean isPriceAvailable = !browser.findElements(By.cssSelector("._30jeq3._16Jk6d")).isEmpty();
+        if (isPriceAvailable) {
+            return commonHelper.convertStringRupeeToInteger(browser.findElement(By.cssSelector("._30jeq3._16Jk6d"))
+                    .getText().trim().split("\\.")[0]);
+        }
+        return null;
     }
 }

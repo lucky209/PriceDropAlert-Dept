@@ -56,7 +56,7 @@ public class FilterByDeptHelper {
             //fetch departments
             boolean isFlipkart; boolean isDeptFound;
             for (int i = 0; i < tabs.size(); i++) {
-                String prodDept = null;String productName;List<String> productDepts;
+                String prodDept = null; List<String> productDepts;
                 try {
                     browser.switchTo().window(tabs.get(i));
                     Thread.sleep(700);
@@ -88,24 +88,7 @@ public class FilterByDeptHelper {
                         }
                     }
                     if (prodDept != null) {
-                        if (isFlipkart)
-                            productName = flipkartHelper.getFlipkartProductName(browser);
-                        else
-                            productName = amazonHelper.getAmazonProductName(browser);
-                        //check if product already exists
-                        DesignedProduct product = designedProductRepo.findByProductNameAndSiteUrl(productName,
-                                browser.getCurrentUrl());
-                        if (product == null) {
-                            batchEntities.get(i).setDepartment(prodDept);
-                            batchEntities.get(i).setIsPicked(true);
-                            batchEntities.get(i).setUpdatedDate(LocalDateTime.now());
-                            batchEntities.get(i).setSiteUrl(browser.getCurrentUrl());
-                            if (productName != null)
-                                batchEntities.get(i).setProductName(productName);
-                            productRepo.save(batchEntities.get(i));
-                        } else {
-                            log.info("Already Designed product found...");
-                        }
+                        this.saveInProductTable(browser, prodDept, batchEntities.get(i), isFlipkart);
                     }
                 } catch (Exception ex) {
                     log.info("Exception occurred for the url {} .Exception is {} . So continuing with next tab",
@@ -119,6 +102,34 @@ public class FilterByDeptHelper {
             Constant.BROWSER_COUNT ++;
             log.info("Total products processed so far is {}", (Constant.BROWSER_COUNT * tabs.size()));
             browser.quit();
+        }
+    }
+
+    private void saveInProductTable(WebDriver browser, String dept, Product product, boolean isFlipkart) {
+        String productName;Integer price;
+        if (isFlipkart) {
+            productName = flipkartHelper.getFlipkartProductName(browser);
+            price = amazonHelper.getPrice(browser);
+        }
+        else {
+            productName = amazonHelper.getAmazonProductName(browser);
+            price = amazonHelper.getPrice(browser);
+        }
+        //check if product already exists
+        DesignedProduct designedProduct = designedProductRepo.findByProductNameAndSiteUrl(productName,
+                browser.getCurrentUrl());
+        if (designedProduct == null) {
+            product.setDepartment(dept);
+            product.setIsPicked(true);
+            product.setUpdatedDate(LocalDateTime.now());
+            product.setSiteUrl(browser.getCurrentUrl());
+            if (productName != null)
+                product.setProductName(productName);
+            if (price != null)
+                product.setPrice(price);
+            productRepo.save(product);
+        } else {
+            log.info("Already Designed product found...");
         }
     }
 }
