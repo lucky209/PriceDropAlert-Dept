@@ -103,7 +103,7 @@ public class AmazonHelper {
         Thread.sleep(1500);
     }
 
-    public Integer getPrice(WebDriver browser) {
+    Integer getPrice(WebDriver browser) {
         boolean isPriceAvailable = !browser.findElements(By.id("priceblock_dealprice")).isEmpty();
         if (isPriceAvailable) {
             return commonHelper.convertStringRupeeToInteger(browser.findElement(By.id("priceblock_dealprice"))
