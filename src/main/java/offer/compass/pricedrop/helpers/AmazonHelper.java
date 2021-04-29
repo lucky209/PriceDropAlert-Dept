@@ -28,9 +28,15 @@ public class AmazonHelper {
 
     synchronized List<String> getAmazonDepartments(WebDriver browser) {
         List<String> dept = new ArrayList<>();
-        WebDriverWait wait = new WebDriverWait(browser, 10);
-        WebElement waitElement = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("wayfinding-breadcrumbs_feature_div")));
+        WebDriverWait wait = new WebDriverWait(browser, 6);
+        WebElement waitElement;
+        try {
+            waitElement = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("wayfinding-breadcrumbs_feature_div")));
+        } catch (Exception ex) {
+            waitElement = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("nav-subnav")));
+        }
         List<WebElement> deptElements = browser.findElements(By.id("wayfinding-breadcrumbs_feature_div"));
         if (!deptElements.isEmpty()) {
             List<WebElement> liElementList = waitElement.findElements(By.tagName(Constant.TAG_LI));
@@ -44,7 +50,7 @@ public class AmazonHelper {
             if (!deptElements.isEmpty()) {
                 List<WebElement> anchorElementList = deptElements.get(0).findElements(By.tagName(Constant.TAG_ANCHOR));
                 for (WebElement element : anchorElementList) {
-                    if (!element.getText().trim().contains("›")) {
+                    if (element.getText() != null && !element.getText().trim().contains("›")) {
                         dept.add(element.getText().trim());
                     }
                 }
