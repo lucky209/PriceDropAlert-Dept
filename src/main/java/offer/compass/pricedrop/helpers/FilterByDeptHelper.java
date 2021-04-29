@@ -1,13 +1,18 @@
 package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
+import offer.compass.pricedrop.constant.Constant;
+import offer.compass.pricedrop.entity.DesignedProduct;
+import offer.compass.pricedrop.entity.DesignedProductRepo;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -24,6 +29,11 @@ public class FilterByDeptHelper {
     private AmazonHelper amazonHelper;
     @Autowired
     private ProductRepo productRepo;
+    @Autowired
+    private DesignedProductRepo designedProductRepo;
+
+    @Value("#{'${sold.out.product.keys}'.split(',')}")
+    private List<String> soldOutProductKeys;
 
     @Transactional
     public void filterByDepartmentsProcess(List<Product> batchEntities, List<String> departments) {
@@ -32,18 +42,29 @@ public class FilterByDeptHelper {
         try {
             //get all urls
             for (int i = 0; i < tabs.size(); i++) {
-                browser.switchTo().window(tabs.get(i));
-                browser.get(batchEntities.get(i).getUrl());
-                if(tabs.size() < 10)
-                    Thread.sleep(1000);
+                try {
+                    browser.switchTo().window(tabs.get(i));
+                    browser.get(batchEntities.get(i).getUrl());
+                    if(tabs.size() < 10)
+                        Thread.sleep(1000);
+                } catch (Exception ex) {
+                    log.info("Exception occurred while loading product link {}", batchEntities.get(i).getUrl());
+                    log.info("so continuing with next tab");
+                }
             }
+
             //fetch departments
             boolean isFlipkart; boolean isDeptFound;
             for (int i = 0; i < tabs.size(); i++) {
                 String prodDept = null;String productName;List<String> productDepts;
                 try {
                     browser.switchTo().window(tabs.get(i));
-                    Thread.sleep(500);
+                    Thread.sleep(700);
+                    //sold out products should not be inserted
+                    if(soldOutProductKeys.stream().anyMatch(browser.getPageSource()::contains)) {
+                        log.info("Found sold out/unavailable product. Moving to next tab");
+                        continue;
+                    }
                     isFlipkart = commonHelper.isFlipkartProduct(browser.getCurrentUrl());
                     if (isFlipkart) {
                         productDepts = flipkartHelper.getFlipkartDepts(browser);
@@ -71,27 +92,32 @@ public class FilterByDeptHelper {
                             productName = flipkartHelper.getFlipkartProductName(browser);
                         else
                             productName = amazonHelper.getAmazonProductName(browser);
-                        batchEntities.get(i).setDepartment(prodDept);
-                        batchEntities.get(i).setIsPicked(true);
-                        batchEntities.get(i).setIsOldRecord(false);
-                        batchEntities.get(i).setSiteUrl(browser.getCurrentUrl());
-                        if (productName != null)
-                            batchEntities.get(i).setProductName(productName);
-                        productRepo.save(batchEntities.get(i));
-                    } else {
-                        productRepo.deleteByProductNameAndUrl(batchEntities.get(i).getProductName(),
-                                batchEntities.get(i).getUrl());
+                        //check if product already exists
+                        DesignedProduct product = designedProductRepo.findByProductNameAndSiteUrl(productName,
+                                browser.getCurrentUrl());
+                        if (product == null) {
+                            batchEntities.get(i).setDepartment(prodDept);
+                            batchEntities.get(i).setIsPicked(true);
+                            batchEntities.get(i).setUpdatedDate(LocalDateTime.now());
+                            batchEntities.get(i).setSiteUrl(browser.getCurrentUrl());
+                            if (productName != null)
+                                batchEntities.get(i).setProductName(productName);
+                            productRepo.save(batchEntities.get(i));
+                        } else {
+                            log.info("Already Designed product found...");
+                        }
                     }
                 } catch (Exception ex) {
-                    log.info("Exception occurred. Exception is {} . So continuing with next tab", ex.getMessage());
-                    productRepo.deleteByProductNameAndUrl(batchEntities.get(i).getProductName(),
-                            batchEntities.get(i).getUrl());
+                    log.info("Exception occurred for the url {} .Exception is {} . So continuing with next tab",
+                            browser.getCurrentUrl(), ex.getMessage());
                 }
             }
         } catch (Exception e) {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), e.getMessage());
         } finally {
-            log.info("Quitting the browser of thread {}", Thread.currentThread().getName());
+            log.info("::: {} stopping...", Thread.currentThread().getName());
+            Constant.BROWSER_COUNT ++;
+            log.info("Total products processed so far is {}", (Constant.BROWSER_COUNT * tabs.size()));
             browser.quit();
         }
     }

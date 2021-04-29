@@ -51,7 +51,8 @@ public class FileHelper {
     void takeScreenshot(WebDriver browser, String dept, int count, boolean isAmazon) throws IOException {
         File srcFile = ((TakesScreenshot) browser).getScreenshotAs(OutputType.FILE);
         BufferedImage image = ImageIO.read(srcFile);
-        String folderPath = Constant.PATH_TO_SAVE_THUMBNAIL + dept + "-" + LocalDate.now() + Constant.UTIL_PATH_SLASH;
+        String folderPath = Constant.PATH_TO_SAVE_THUMBNAIL + LocalDate.now() + Constant.UTIL_PATH_SLASH +
+                dept + "-screenshots" + Constant.UTIL_PATH_SLASH;
         String pathToSave;
         if (isAmazon)
             pathToSave = folderPath + (count+1)+ "-SS-Amazon" + Constant.IMAGE_FORMAT;

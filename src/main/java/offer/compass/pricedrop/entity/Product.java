@@ -31,6 +31,7 @@ public class Product {
     private Integer filterFactor;
     private Integer productNo;
     private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
     private Boolean isPicked;
     private Boolean isOldRecord;
 }

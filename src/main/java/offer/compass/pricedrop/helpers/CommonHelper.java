@@ -2,6 +2,7 @@ package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
+import offer.compass.pricedrop.entity.DesignedProductRepo;
 import offer.compass.pricedrop.entity.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,8 @@ import java.time.LocalDate;
 @Slf4j
 public class CommonHelper {
 
+    @Autowired
+    private DesignedProductRepo designedProductRepo;
     @Autowired
     private ProductRepo productRepo;
 
@@ -33,24 +36,21 @@ public class CommonHelper {
         return Integer.parseInt(rupee);
     }
 
-    int maxThreads(int records) {
-        int searchPerPage = Math.min(records, searchCount);
-        return records > searchPerPage ? 2:1;
-    }
-
     boolean isFlipkartProduct(String currentUrl) {
         return currentUrl.contains("www.flipkart.com");
     }
 
     public void cleanupProductTable() {
-        //clean all records of 7 days older
+        //clean all designed records of 7 days older
         LocalDate seventhDayFromToday = LocalDate.now().minusDays(7);
-        int count = productRepo.getRecordsCountByCreatedDate(seventhDayFromToday);
+        int count = designedProductRepo.getRecordsCountByCreatedDate(seventhDayFromToday);
         if (count != 0) {
-            productRepo.deleteRecordsByCreatedDate(seventhDayFromToday);
+            designedProductRepo.deleteRecordsByCreatedDate(seventhDayFromToday);
             log.info("Deleted {} record(s)...", count);
         }
         else
             log.info("Deleted 0 records...");
+        //delete all product table
+        productRepo.deleteAll();
     }
 }

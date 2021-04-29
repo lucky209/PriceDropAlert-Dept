@@ -43,10 +43,16 @@ public class PriceHistoryHelper {
         try {
             //load price history link in all tabs
             for (int i = 0; i < tabs.size(); i++) {
-                browser.switchTo().window(tabs.get(i));
-                browser.get(batchEntities.get(i).getPriceHistoryLink());
-                if (batchEntities.size() < 10) {
-                    Thread.sleep(1000);
+                try {
+                    browser.switchTo().window(tabs.get(i));
+                    browser.get(batchEntities.get(i).getPriceHistoryLink());
+                    if (batchEntities.size() < 10) {
+                        Thread.sleep(1000);
+                    }
+                } catch (Exception e) {
+                    log.info("Exception occurred while loading product price history link {}",
+                            batchEntities.get(i).getPriceHistoryLink());
+                    log.info("so continuing with next tab");
                 }
             }
             //wait for current price and dotted element and get width of the element
@@ -62,9 +68,9 @@ public class PriceHistoryHelper {
                         Thread.sleep(3000);
                         this.fetchDropDetails(browser, actions, batchEntities.get(i));
                     } catch (Exception e) {
-                        log.info("Exception occurred again for the url {} . Moving to next tab.", browser.getCurrentUrl());
-                        productRepo.deleteByProductNameAndUrl(batchEntities.get(i).getProductName(),
-                                batchEntities.get(i).getUrl());
+                        log.info("Exception occurred again for the url {} . Moving to next tab.",
+                                browser.getCurrentUrl());
+                        productRepo.delete(batchEntities.get(i));
                     }
                 }
             }
@@ -72,6 +78,8 @@ public class PriceHistoryHelper {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), ex.getMessage());
         } finally {
             log.info("Quitting the browser of thread {}", Thread.currentThread().getName());
+            Constant.BROWSER_COUNT ++;
+            log.info("Total products processed so far is {}", (Constant.BROWSER_COUNT * tabs.size()));
             browser.quit();
         }
     }
@@ -175,7 +183,6 @@ public class PriceHistoryHelper {
         if (priceDropFromPrice > priceDropToPrice) {
             int filterFactorValue = this.getFilterFactor(priceDropFromPrice, priceDropToPrice);
             if (filterFactorValue > filterFactorThreshold) {
-                product.setCreatedDate(LocalDateTime.now());
                 product.setPricedropFromPrice(priceDropFromPrice);
                 product.setPricedropFromDate(this.convertPhDateToLocalDate(priceDropDate));
                 product.setDropChances(this.getDropChances(browser));
@@ -183,17 +190,10 @@ public class PriceHistoryHelper {
                 product.setLowestPrice(this.getLowestPrice(browser));
                 product.setRatingStar(this.getRatingStar(browser));
                 product.setFilterFactor(filterFactorValue);
-                product.setIsOldRecord(false);
+                product.setUpdatedDate(LocalDateTime.now());
                 productRepo.save(product);
-            } else {
-                productRepo.deleteByProductNameAndUrl(product.getProductName(),
-                        product.getUrl());
             }
-        } else {
-            productRepo.deleteByProductNameAndUrl(product.getProductName(),
-                    product.getUrl());
         }
-
     }
 
     private LocalDate convertPhDateToLocalDate(String phDate) {

@@ -49,4 +49,7 @@ public class Constant {
     public static final String UTIL_SINGLE_SPACE = " ";
     public static final String UTIL_HYPHEN = "-";
     public static final String UTIL_FORWARD_SLASH = "/";
+
+    //COUNT CONSTANTS
+    public static int BROWSER_COUNT = 0;
 }

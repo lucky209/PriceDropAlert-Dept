@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
 import offer.compass.pricedrop.constant.PriceHistoryConstants;
 import offer.compass.pricedrop.constant.PropertyConstants;
-import offer.compass.pricedrop.entity.Product;
-import offer.compass.pricedrop.entity.ProductRepo;
-import offer.compass.pricedrop.entity.Property;
-import offer.compass.pricedrop.entity.PropertyRepo;
+import offer.compass.pricedrop.entity.*;
 import offer.compass.pricedrop.service.FilterByDepartmentsProcess;
 import offer.compass.pricedrop.service.PriceHistoryProcess;
 import org.openqa.selenium.By;
@@ -47,6 +44,8 @@ public class PriceDropHelper {
     private FlipkartHelper flipkartHelper;
     @Autowired
     private FileHelper fileHelper;
+    @Autowired
+    private DesignedProductRepo designedProductRepo;
 
     @Value("${product.needed.count.default.value}")
     private int productNeededCount;
@@ -88,10 +87,9 @@ public class PriceDropHelper {
                 log.info("No product elements found");
             //saving in current deal table
             log.info("Saving the products in the table...");
-            log.info("Products found was {}", productElements.size());
             String productName; String url; int price; String priceHistoryUrl;int saveCount=0;
-            for (WebElement productElement : productElements) {
-                WebElement elementProductName = productElement.findElement(By.cssSelector(
+            for (int i=0; i < productNeededCount; i++) {
+                WebElement elementProductName = productElements.get(i).findElement(By.cssSelector(
                         PriceHistoryConstants.PRODUCT_NAME_CSS_SELECTOR));
                 if (elementProductName != null) {
                     productName = elementProductName.getText().trim();
@@ -100,16 +98,13 @@ public class PriceDropHelper {
                                 .getAttribute(Constant.ATTRIBUTE_HREF);
                         if (url.contains(PriceHistoryConstants.AMAZON_URL) ||
                                 url.contains(PriceHistoryConstants.FLIPKART_URL)) {
-                            price = commonHelper.convertStringRupeeToInteger(productElement.findElement(
+                            price = commonHelper.convertStringRupeeToInteger(productElements.get(i).findElement(
                                     By.className(PriceHistoryConstants.PRICE_CLASS)).getText().trim());
-                            priceHistoryUrl = productElement.findElement(By.className(
+                            priceHistoryUrl = productElements.get(i).findElement(By.className(
                                     PriceHistoryConstants.PRICE_HISTORY_URL_CLASS))
                                     .getAttribute(Constant.ATTRIBUTE_HREF);
-                            Product product = productRepo.findByProductNameAndUrl(productName, url);
-                            if (product == null) {
-                                this.saveInProductTable(productName, url, price, priceHistoryUrl);
-                                saveCount++;
-                            }
+                            this.saveInProductTable(productName, url, price, priceHistoryUrl);
+                            saveCount++;
                         }
                     }
                 }
@@ -139,8 +134,8 @@ public class PriceDropHelper {
         product.setPrice(price);
         product.setPriceHistoryLink(priceHistoryUrl);
         product.setCreatedDate(LocalDateTime.now());
+        product.setUpdatedDate(LocalDateTime.now());
         product.setIsPicked(false);
-        product.setIsOldRecord(false);
         productRepo.save(product);
     }
 
@@ -148,10 +143,10 @@ public class PriceDropHelper {
         int lastAttemptFetchedCount = Integer.parseInt(propertyRepo.findByPropName(
                 PropertyConstants.PRODUCTS_SAVED_IN_LAST_ATTEMPT_COUNT).getPropValue());
         List<Product> productList = productRepo.fetchLastAttemptCurrentDeals(lastAttemptFetchedCount);
-        int maxThreads = commonHelper.maxThreads(productList.size());
         if (productList.size() > 0) {
             log.info("Number of deals found from product table is " + productList.size());
-            ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
+            ExecutorService pool = Executors.newFixedThreadPool(
+                    Integer.parseInt(propertyRepo.findByPropName(PropertyConstants.MAX_THREADS_COUNT).getPropValue()));
             for (List<Product> batchEntities : Lists.partition(productList,
                     Math.min(productList.size(), searchPerPage))) {
                 Thread thread = new FilterByDepartmentsProcess(batchEntities, filterByDeptHelper, departments);
@@ -165,10 +160,10 @@ public class PriceDropHelper {
 
     public void updatePriceHistoryDetails() throws InterruptedException {
         List<Product> productList = productRepo.findByIsPicked(true);
-        int maxThreads = commonHelper.maxThreads(productList.size());
         if (productList.size() > 0) {
             log.info("Number of deals found from product table is " + productList.size());
-            ExecutorService pool = Executors.newFixedThreadPool(maxThreads);
+            ExecutorService pool = Executors.newFixedThreadPool(
+                    Integer.parseInt(propertyRepo.findByPropName(PropertyConstants.MAX_THREADS_COUNT).getPropValue()));
             for (List<Product> batchEntities : Lists.partition(productList,
                     Math.min(productList.size(), searchPerPage))) {
                 Thread thread = new PriceHistoryProcess(batchEntities, priceHistoryHelper);
@@ -218,5 +213,27 @@ public class PriceDropHelper {
             imgCount++;
         }
         browser.quit();
+    }
+
+    public void insertDesignedProducts(List<String> departments) {
+        List<Product> designedProducts = productRepo.findByProductNoIsNotNullAndDepartmentIsIn(departments);
+        log.info("Found {} from product_table to insert in designed product table", designedProducts.size());
+        designedProducts.forEach(this::saveInDesignedProductTable);
+        log.info("Inserted successfully...");
+    }
+
+    private void saveInDesignedProductTable(Product product) {
+        DesignedProduct designedProduct = new DesignedProduct();
+        designedProduct.setSiteUrl(product.getSiteUrl());
+        designedProduct.setCreatedDate(LocalDateTime.now());
+        designedProduct.setDepartment(product.getDepartment());
+        designedProduct.setFilterFactor(product.getFilterFactor());
+        designedProduct.setPricedropFromDate(product.getPricedropFromDate());
+        designedProduct.setPricedropFromPrice(product.getPricedropFromPrice());
+        designedProduct.setProductName(product.getProductName());
+        designedProduct.setProductNo(product.getProductNo());
+        designedProduct.setShortenUrl(product.getShortenUrl());
+        designedProduct.setPrice(product.getPrice());
+        designedProductRepo.save(designedProduct);
     }
 }
