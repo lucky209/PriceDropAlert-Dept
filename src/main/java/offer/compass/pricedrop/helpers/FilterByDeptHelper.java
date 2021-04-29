@@ -109,7 +109,7 @@ public class FilterByDeptHelper {
         String productName;Integer price;
         if (isFlipkart) {
             productName = flipkartHelper.getFlipkartProductName(browser);
-            price = amazonHelper.getPrice(browser);
+            price = flipkartHelper.getPrice(browser);
         }
         else {
             productName = amazonHelper.getAmazonProductName(browser);
