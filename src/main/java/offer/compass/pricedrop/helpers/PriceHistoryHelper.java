@@ -70,7 +70,6 @@ public class PriceHistoryHelper {
                     } catch (Exception e) {
                         log.info("Exception occurred again for the url {} . Moving to next tab.",
                                 browser.getCurrentUrl());
-                        productRepo.delete(batchEntities.get(i));
                     }
                 }
             }

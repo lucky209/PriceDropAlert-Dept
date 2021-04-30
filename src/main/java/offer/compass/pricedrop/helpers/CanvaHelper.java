@@ -82,17 +82,17 @@ public class CanvaHelper {
         ((JavascriptExecutor) browser).executeScript("arguments[0].scrollIntoView(true);", templateDivElement);
         Thread.sleep(2000);
         List<WebElement> components = templateDivElement.findElements(By.className(CanvaConstant.SINGLE_TEMPLATE_CLASS_NAME));
-        String productName = components.get(4).getText();
-        String todayPrice = components.get(8).getText();
-        String priceDropFromPrice = components.get(9).getText();
+        String productName = components.get(2).getText();
+        String todayPrice = components.get(10).getText();
+        String priceDropFromPrice = components.get(11).getText();
         String priceDropFromDate = components.get(12).getText();
         Actions actions = new Actions(browser);
         //update title
-        this.updateText(components.get(4), actions, product.getProductName(), productName);
+        this.updateText(components.get(2), actions, product.getProductName(), productName);
         //update todays price
-        this.updateText(components.get(8), actions, convertToIndianNumberFormat(product.getPrice())+"/-", todayPrice);
+        this.updateText(components.get(10), actions, convertToIndianNumberFormat(product.getPrice())+"/-", todayPrice);
         //update price drop price
-        this.updateText(components.get(9), actions, convertToIndianNumberFormat(product.getPricedropFromPrice())+"/-",
+        this.updateText(components.get(11), actions, convertToIndianNumberFormat(product.getPricedropFromPrice())+"/-",
                 priceDropFromPrice);
         //update price drop date
         this.updateText(components.get(12), actions, this.convertToCanvaDesignDate(product.getPricedropFromDate()),
