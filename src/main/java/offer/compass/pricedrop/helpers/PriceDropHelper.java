@@ -140,9 +140,7 @@ public class PriceDropHelper {
     }
 
     public void filterByDepartments(List<String> departments) throws InterruptedException {
-        int lastAttemptFetchedCount = Integer.parseInt(propertyRepo.findByPropName(
-                PropertyConstants.PRODUCTS_SAVED_IN_LAST_ATTEMPT_COUNT).getPropValue());
-        List<Product> productList = productRepo.fetchLastAttemptCurrentDeals(lastAttemptFetchedCount);
+        List<Product> productList = productRepo.findAll();
         if (productList.size() > 0) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(

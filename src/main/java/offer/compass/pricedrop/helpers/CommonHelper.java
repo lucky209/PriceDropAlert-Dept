@@ -46,11 +46,12 @@ public class CommonHelper {
         int count = designedProductRepo.getRecordsCountByCreatedDate(seventhDayFromToday);
         if (count != 0) {
             designedProductRepo.deleteRecordsByCreatedDate(seventhDayFromToday);
-            log.info("Deleted {} record(s)...", count);
+            log.info("Deleted {} record(s) in designed table...", count);
         }
         else
-            log.info("Deleted 0 records...");
+            log.info("Deleted 0 records in designed table...");
         //delete all product table
         productRepo.deleteAll();
+        log.info("Deleted all records in product table...");
     }
 }
