@@ -127,9 +127,9 @@ public class FilterByDeptHelper {
                 product.setProductName(productName);
             if (price != null)
                 product.setPrice(price);
-            productRepo.save(product);
+            productRepo.saveAndFlush(product);
         } else {
-            log.info("Already Designed product found...");
+            log.info("Already designed product found...");
         }
     }
 }

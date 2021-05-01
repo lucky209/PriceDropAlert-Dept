@@ -2,8 +2,11 @@ package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
+import offer.compass.pricedrop.constant.PropertyConstants;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
+import offer.compass.pricedrop.entity.Property;
+import offer.compass.pricedrop.entity.PropertyRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -13,7 +16,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -33,9 +35,8 @@ public class PriceHistoryHelper {
     private CommonHelper commonHelper;
     @Autowired
     private ProductRepo productRepo;
-
-    @Value("${filter.factor.threshold.value}")
-    private int filterFactorThreshold;
+    @Autowired
+    private PropertyRepo propertyRepo;
 
     public void priceHistoryProcess(List<Product> batchEntities) {
         WebDriver browser = browserHelper.openBrowser(true);
@@ -55,18 +56,18 @@ public class PriceHistoryHelper {
                     log.info("so continuing with next tab");
                 }
             }
-            //wait for current price and dotted element and get width of the element
+
             Actions actions = new Actions(browser);
             for (int i = 0; i < tabs.size(); i++) {
                 browser.switchTo().window(tabs.get(i));
                 try {
-                    this.fetchDropDetails(browser, actions, batchEntities.get(i));
+                    this.fetchAndUpdatePriceDropDetails(browser, actions, batchEntities.get(i));
                 } catch (Exception ex) {
                     log.info("Exception occurred. Exception is {} . So Retrying...", ex.getMessage());
                     try {
                         browser.get(batchEntities.get(i).getPriceHistoryLink());
                         Thread.sleep(3000);
-                        this.fetchDropDetails(browser, actions, batchEntities.get(i));
+                        this.fetchAndUpdatePriceDropDetails(browser, actions, batchEntities.get(i));
                     } catch (Exception e) {
                         log.info("Exception occurred again for the url {} . Moving to next tab.",
                                 browser.getCurrentUrl());
@@ -83,7 +84,7 @@ public class PriceHistoryHelper {
         }
     }
 
-    private void fetchDropDetails(WebDriver browser, Actions actions, Product product) throws InterruptedException {
+    private void fetchAndUpdatePriceDropDetails(WebDriver browser, Actions actions, Product product) throws InterruptedException {
         String currentPrice = null; String currentDate = null;String priceDropDate = null; String priceDropPrice = null;
         boolean isLoaded = this.loadCurrentPriceElement(browser);
         if (!isLoaded) {
@@ -177,11 +178,12 @@ public class PriceHistoryHelper {
     private void updatePriceHistoryGraphDetails(WebDriver browser, Product product,
                                                 String priceDropDate, String priceDropPrice,
                                                 String currentPrice) {
+        Property filterFactorProperty = propertyRepo.findByPropName(PropertyConstants.FILTER_FACTOR_THRESHOLD);
         int priceDropFromPrice = commonHelper.convertStringRupeeToInteger(priceDropPrice);
         int priceDropToPrice = commonHelper.convertStringRupeeToInteger(currentPrice);
         if (priceDropFromPrice > priceDropToPrice) {
             int filterFactorValue = this.getFilterFactor(priceDropFromPrice, priceDropToPrice);
-            if (filterFactorValue > filterFactorThreshold) {
+            if (filterFactorValue > Integer.parseInt(filterFactorProperty.getPropValue())) {
                 product.setPricedropFromPrice(priceDropFromPrice);
                 product.setPricedropFromDate(this.convertPhDateToLocalDate(priceDropDate));
                 product.setDropChances(this.getDropChances(browser));
@@ -190,7 +192,7 @@ public class PriceHistoryHelper {
                 product.setRatingStar(this.getRatingStar(browser));
                 product.setFilterFactor(filterFactorValue);
                 product.setUpdatedDate(LocalDateTime.now());
-                productRepo.save(product);
+                productRepo.saveAndFlush(product);
             }
         }
     }
