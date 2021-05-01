@@ -69,6 +69,7 @@ public class PriceDropServiceImpl implements PriceDropService {
     @Override
     public void updatePriceHistoryDetails(List<String> departments) throws InterruptedException {
         // run price history graph process and fetch final products
+        Constant.BROWSER_COUNT = 0;
         log.info("Starting to update price history details...");
         priceDropHelper.updatePriceHistoryDetails();
         Constant.BROWSER_COUNT = 0;
