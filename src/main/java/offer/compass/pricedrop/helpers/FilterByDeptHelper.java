@@ -105,7 +105,8 @@ public class FilterByDeptHelper {
         }
     }
 
-    private void saveInProductTable(WebDriver browser, String dept, Product product, boolean isFlipkart) {
+    @Transactional
+    void saveInProductTable(WebDriver browser, String dept, Product product, boolean isFlipkart) {
         String productName;Integer price;
         if (isFlipkart) {
             productName = flipkartHelper.getFlipkartProductName(browser);

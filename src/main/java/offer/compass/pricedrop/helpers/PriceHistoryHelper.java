@@ -18,6 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -175,7 +176,8 @@ public class PriceHistoryHelper {
         actions.build().perform();
     }
 
-    private void updatePriceHistoryGraphDetails(WebDriver browser, Product product,
+    @Transactional
+    void updatePriceHistoryGraphDetails(WebDriver browser, Product product,
                                                 String priceDropDate, String priceDropPrice,
                                                 String currentPrice) {
         Property filterFactorProperty = propertyRepo.findByPropName(PropertyConstants.FILTER_FACTOR_THRESHOLD);
