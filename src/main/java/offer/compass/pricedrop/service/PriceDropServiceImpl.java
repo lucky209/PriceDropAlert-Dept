@@ -64,8 +64,10 @@ public class PriceDropServiceImpl implements PriceDropService {
         log.info("Starting to filter the products by departments...");
         priceDropHelper.filterByDepartments(departments);
         Constant.BROWSER_COUNT = 0;
-        Thread.sleep(3000);
+    }
 
+    @Override
+    public void updatePriceHistoryDetails(List<String> departments) throws InterruptedException {
         // run price history graph process and fetch final products
         log.info("Starting to update price history details...");
         priceDropHelper.updatePriceHistoryDetails();

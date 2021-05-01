@@ -13,4 +13,6 @@ public interface PriceDropService {
     void getTextDetails(List<String> departments) throws Exception;
 
     void makeCanvaDesign(List<String> departments) throws Exception;
+
+    void updatePriceHistoryDetails(List<String> departments) throws InterruptedException;
 }

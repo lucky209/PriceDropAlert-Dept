@@ -3,7 +3,6 @@ package offer.compass.pricedrop.controller;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.service.PriceDropService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,11 +20,17 @@ public class PriceDropController {
     private PriceDropService priceDropService;
 
     @PostMapping("/price-drop-alert/get-products")
-    @Async
     public Future<Boolean> getProducts(@RequestBody List<String> departments) throws Exception {
         log.info("::: Request received to get price drop alert products for the departments {}", departments);
         priceDropService.getProducts(departments);
         return new AsyncResult<>(true);
+    }
+
+    @PostMapping("/price-drop-alert/update-ph-details")
+    public boolean updatePriceHistoryDetails(@RequestBody List<String> departments) throws Exception {
+        log.info("::: Request received to updatePriceHistoryDetails for the departments {}", departments);
+        priceDropService.updatePriceHistoryDetails(departments);
+        return true;
     }
 
     @PostMapping("/price-drop-alert/download-images")
