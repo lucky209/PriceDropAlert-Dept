@@ -30,12 +30,10 @@ public class ShortenUrlHelper {
             browser.switchTo().window(tab);
             browser.get(Constant.SHORTEN_WEB_PAGE_CUTTLY);
         }
-        //close popup
         for (String tab : tabs) {
             browser.switchTo().window(tab);
             this.clickAcceptCookiesButton(browser);
         }
-        //click short url button and copy & save
         for (int i=0;i<tabs.size();i++) {
             browser.switchTo().window(tabs.get(i));
             try {
