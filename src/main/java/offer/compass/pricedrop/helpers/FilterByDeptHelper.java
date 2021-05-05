@@ -77,7 +77,7 @@ public class FilterByDeptHelper {
                         boolean isDeptCaught = false;
                         for (String productDept : productDepts) {
                             for (String department : departments) {
-                                if (department.equals(productDept)) {
+                                if (productDept.toLowerCase().contains(department.toLowerCase())) {
                                     prodDept = department;
                                     isDeptCaught = true;
                                     break;

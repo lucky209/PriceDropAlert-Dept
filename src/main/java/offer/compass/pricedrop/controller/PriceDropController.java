@@ -27,9 +27,9 @@ public class PriceDropController {
     }
 
     @PostMapping("/price-drop-alert/update-ph-details")
-    public boolean updatePriceHistoryDetails(@RequestBody List<String> departments) throws Exception {
-        log.info("::: Request received to updatePriceHistoryDetails for the departments {}", departments);
-        priceDropService.updatePriceHistoryDetails(departments);
+    public boolean updatePriceHistoryDetails() throws Exception {
+        log.info("::: Request received to updatePriceHistoryDetails");
+        priceDropService.updatePriceHistoryDetails();
         return true;
     }
 
