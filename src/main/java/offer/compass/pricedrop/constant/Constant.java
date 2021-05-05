@@ -30,6 +30,7 @@ public class Constant {
 
     //shorten url
     public static final String SHORTEN_WEB_PAGE = "https://bitly.com/";
+    public static final String SHORTEN_WEB_PAGE_CUTTLY = "https://cutt.ly/";
     public static final String SHORTEN_WEB_POPUP_CLOSE_BUTTON_ID = "wow-modal-close-7";
     public static final String LONG_URL_TEXT_BOX_ID = "shorten_url";
     public static final String SHORTEN_BUTTON_ID = "shorten_btn";
