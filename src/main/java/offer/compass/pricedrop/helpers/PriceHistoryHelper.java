@@ -85,8 +85,9 @@ public class PriceHistoryHelper {
         }
     }
 
-    private void fetchAndUpdatePriceDropDetails(WebDriver browser, Actions actions, Product product) throws InterruptedException {
-        String currentPrice = null; String currentDate = null;String priceDropDate = null; String priceDropPrice = null;
+    private void fetchAndUpdatePriceDropDetails(WebDriver browser, Actions actions, Product product)
+            throws InterruptedException {
+        String priceDropDate = null; String priceDropPrice = null;
         boolean isLoaded = this.loadCurrentPriceElement(browser);
         if (!isLoaded) {
             return;
@@ -97,18 +98,8 @@ public class PriceHistoryHelper {
             int width = dimension.getWidth() / 2;
             this.moveOverElementByOffset(cpDotElement, width, actions);
             //get current price
-            List<WebElement> textElements = browser.findElements(By.tagName("text"));
-            for (WebElement textElement : textElements) {
-                if (textElement.getAttribute("x").equals("8")) {
-                    List<WebElement> childElements = textElement.findElements(By.xpath("./*"));
-                    if (childElements.size() == 4) {
-                        currentDate = childElements.get(0).getAttribute(Constant.ATTRIBUTE_INNER_HTML).trim();
-                        currentPrice = childElements.get(3).getAttribute(Constant.ATTRIBUTE_INNER_HTML).trim();
-                        break;
-                    }
-                }
-            }
-            //move inside and find last price changed node
+            List<WebElement> textElements;
+            // move inside and find last price changed node
             for (int j=1;j<=5;j++) {
                 this.moveOverElementByOffset(cpDotElement, width -(j*12), actions);
                 textElements = browser.findElements(By.tagName("text"));
@@ -118,23 +109,25 @@ public class PriceHistoryHelper {
                         if (childElements.size() == 4) {
                             priceDropDate = childElements.get(0).getAttribute(Constant.ATTRIBUTE_INNER_HTML).trim();
                             priceDropPrice = childElements.get(3).getAttribute(Constant.ATTRIBUTE_INNER_HTML).trim();
-                            if (currentPrice != null && !currentPrice.equals(priceDropPrice)) {
-                                if (!currentDate.equals(priceDropDate)) {
+                            if (product.getPrice() != null && !product.getPrice().toString().equals(priceDropPrice)) {
+                                if (!LocalDate.now().equals(this.convertPhDateToLocalDate(priceDropDate))) {
                                     break;
                                 }
                             }
                         }
                     }
                 }
-                if (priceDropPrice != null && !priceDropPrice.equals(currentPrice))
-                    if (!priceDropDate.equals(currentDate))
+                if (priceDropPrice != null && product.getPrice()!= null &&
+                        !priceDropPrice.equals(product.getPrice().toString()))
+                    if (!this.convertPhDateToLocalDate(priceDropDate).equals(LocalDate.now()))
                         break;
             }
         }
         //save in price history graph table
-        if (priceDropPrice != null && !priceDropPrice.equals(currentPrice)) {
-            if (!priceDropDate.equals(currentDate)) {
-                this.updatePriceHistoryGraphDetails(browser, product, priceDropDate, priceDropPrice, currentPrice);
+        if (priceDropPrice != null && product.getPrice()!= null &&
+                !priceDropPrice.equals(product.getPrice().toString())) {
+            if (!this.convertPhDateToLocalDate(priceDropDate).equals(LocalDate.now())) {
+                this.updatePriceHistoryGraphDetails(browser, product, priceDropDate, priceDropPrice, product.getPrice());
             }
         }
     }
@@ -179,12 +172,11 @@ public class PriceHistoryHelper {
     @Transactional
     void updatePriceHistoryGraphDetails(WebDriver browser, Product product,
                                                 String priceDropDate, String priceDropPrice,
-                                                String currentPrice) {
+                                                Integer currentPrice) {
         Property filterFactorProperty = propertyRepo.findByPropName(PropertyConstants.FILTER_FACTOR_THRESHOLD);
         int priceDropFromPrice = commonHelper.convertStringRupeeToInteger(priceDropPrice);
-        int priceDropToPrice = commonHelper.convertStringRupeeToInteger(currentPrice);
-        if (priceDropFromPrice > priceDropToPrice) {
-            int filterFactorValue = this.getFilterFactor(priceDropFromPrice, priceDropToPrice);
+        if (priceDropFromPrice > currentPrice) {
+            int filterFactorValue = this.getFilterFactor(priceDropFromPrice, currentPrice);
             if (filterFactorValue > Integer.parseInt(filterFactorProperty.getPropValue())) {
                 product.setPricedropFromPrice(priceDropFromPrice);
                 product.setPricedropFromDate(this.convertPhDateToLocalDate(priceDropDate));

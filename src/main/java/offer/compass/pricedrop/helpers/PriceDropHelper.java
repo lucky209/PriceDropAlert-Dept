@@ -116,6 +116,7 @@ public class PriceDropHelper {
             propertyRepo.save(property);
             log.info("************Summary************");
             log.info("Number of found was {}", productElements.size());
+            log.info("Number of needed {}", productNeededCount);
             log.info("Number of products saved successfully in product table is {}", saveCount);
             log.info("******************************");
         } catch (Exception ex) {
