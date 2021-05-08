@@ -79,8 +79,7 @@ public class PriceHistoryHelper {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), ex.getMessage());
         } finally {
             log.info("Quitting the browser of thread {}", Thread.currentThread().getName());
-            Constant.BROWSER_COUNT ++;
-            log.info("Total products processed so far is {}", (Constant.BROWSER_COUNT * tabs.size()));
+            log.info("Total products processed so far is {}", (Constant.PRODUCTS_PROCESSED + tabs.size()));
             browser.quit();
         }
     }

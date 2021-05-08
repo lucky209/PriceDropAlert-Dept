@@ -140,7 +140,7 @@ public class PriceDropHelper {
         productRepo.save(product);
     }
 
-    public void filterByDepartments(List<String> departments) throws InterruptedException {
+    public void filterByDepartments() throws InterruptedException {
         List<Product> productList = productRepo.findAll();
         if (productList.size() > 0) {
             log.info("Number of deals found from product table is " + productList.size());
@@ -148,7 +148,7 @@ public class PriceDropHelper {
                     Integer.parseInt(propertyRepo.findByPropName(PropertyConstants.MAX_THREADS_COUNT).getPropValue()));
             for (List<Product> batchEntities : Lists.partition(productList,
                     Math.min(productList.size(), searchPerPage))) {
-                Thread thread = new FilterByDepartmentsProcess(batchEntities, filterByDeptHelper, departments);
+                Thread thread = new FilterByDepartmentsProcess(batchEntities, filterByDeptHelper);
                 pool.execute(thread);
             }
             pool.shutdown();
@@ -214,8 +214,8 @@ public class PriceDropHelper {
         browser.quit();
     }
 
-    public void insertDesignedProducts(List<String> departments) {
-        List<Product> designedProducts = productRepo.findByProductNoIsNotNullAndDepartmentIsIn(departments);
+    public void insertDesignedProducts() {
+        List<Product> designedProducts = productRepo.findByIsSelectedTrue();
         log.info("Found {} from product_table to insert in designed product table", designedProducts.size());
         designedProducts.forEach(this::saveInDesignedProductTable);
         log.info("Inserted successfully...");

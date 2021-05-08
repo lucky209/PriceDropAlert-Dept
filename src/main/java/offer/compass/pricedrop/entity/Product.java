@@ -34,4 +34,10 @@ public class Product {
     private LocalDateTime updatedDate;
     private Boolean isPicked;
     private Boolean isOldRecord;
+    private Boolean isSelected;
+    private String subDept1;
+    private String subDept2;
+    private String subDept3;
+    private String subDept4;
+    private String subDept5;
 }

@@ -11,18 +11,15 @@ public class FilterByDepartmentsProcess extends Thread {
 
     private List<Product> batchEntities;
     private FilterByDeptHelper helper;
-    private List<String> departments;
 
-    public FilterByDepartmentsProcess(List<Product> batchEntities, FilterByDeptHelper helper,
-                                      List<String> departments) {
+    public FilterByDepartmentsProcess(List<Product> batchEntities, FilterByDeptHelper helper) {
         this.batchEntities = batchEntities;
         this.helper = helper;
-        this.departments = departments;
     }
 
     @Override
     public void run() {
         log.info("::: " + Thread.currentThread().getName() + " is started...");
-        helper.filterByDepartmentsProcess(batchEntities, departments);
+        helper.filterByDepartmentsProcess(batchEntities);
     }
 }

@@ -50,7 +50,7 @@ public class PriceDropServiceImpl implements PriceDropService {
 
 
     @Override
-    public void getProducts(List<String> departments) throws Exception {
+    public void getProducts() throws Exception {
         //cleanup data before 7 days
         commonHelper.cleanupProductTable();
 
@@ -60,30 +60,30 @@ public class PriceDropServiceImpl implements PriceDropService {
         Thread.sleep(3000);
 
         // filter the fetched products by departments
-        Constant.BROWSER_COUNT = 0;
+        Constant.PRODUCTS_PROCESSED = 0;
         log.info("Starting to filter the products by departments...");
-        priceDropHelper.filterByDepartments(departments);
-        Constant.BROWSER_COUNT = 0;
+        priceDropHelper.filterByDepartments();
+        Constant.PRODUCTS_PROCESSED = 0;
     }
 
     @Override
     public void updatePriceHistoryDetails() throws InterruptedException {
         // run price history graph process and fetch final products
-        Constant.BROWSER_COUNT = 0;
+        Constant.PRODUCTS_PROCESSED = 0;
         priceDropHelper.updatePriceHistoryDetails();
-        Constant.BROWSER_COUNT = 0;
+        Constant.PRODUCTS_PROCESSED = 0;
     }
 
     @Override
-    public void downloadImages(List<String> departments) throws InterruptedException {
-        List<Product> productList = productRepo.findByFilterFactorIsNotNullAndDepartmentIsIn(departments);
+    public void downloadImages(String dept) throws InterruptedException {
+        List<Product> productList = productRepo.findByIsSelectedTrue();
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
             int imgCount = 0;
             for (List<Product> batchEntities : Lists.partition(productList,
                     Math.min(productList.size(), searchPerPage))) {
-                Thread thread = new downloadImagesProcess(batchEntities, priceDropHelper, departments.get(0), imgCount);
+                Thread thread = new downloadImagesProcess(batchEntities, priceDropHelper, dept, imgCount);
                 pool.execute(thread);
                 imgCount = imgCount + searchPerPage;
             }
@@ -94,9 +94,8 @@ public class PriceDropServiceImpl implements PriceDropService {
     }
 
     @Override
-    public void shortenUrl(List<String> departments) throws InterruptedException {
-        List<Product> productList =
-                productRepo.findByProductNoIsNotNullAndDepartmentIsIn(departments);
+    public void shortenUrl() throws InterruptedException {
+        List<Product> productList = productRepo.findByIsSelectedTrue();
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -113,9 +112,8 @@ public class PriceDropServiceImpl implements PriceDropService {
 
     @Override
     @Transactional
-    public void makeCanvaDesign(List<String> departments) throws Exception {
-        List<Product> canvaList =
-                productRepo.findByProductNoIsNotNullAndDepartmentIsIn(departments)
+    public void makeCanvaDesign() throws Exception {
+        List<Product> canvaList = productRepo.findByIsSelectedTrue()
                 .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
         log.info("Number of deals found from product table is " + canvaList.size());
         Property property = propertyRepo.findByPropName(PropertyConstants.HEADLESS_MODE);
@@ -129,10 +127,9 @@ public class PriceDropServiceImpl implements PriceDropService {
     }
 
     @Override
-    public void getTextDetails(List<String> departments) throws Exception {
-        String mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + departments.get(0) + "-" + LocalDate.now() + ".txt";
-        List<Product> youtubeDescList =
-                productRepo.findByProductNoIsNotNullAndDepartmentIsIn(departments)
+    public void getTextDetails(String department) throws Exception {
+        String mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + department + "-" + LocalDate.now() + ".txt";
+        List<Product> youtubeDescList = productRepo.findByIsSelectedTrue()
                 .stream().sorted(Comparator.comparing(Product::getProductNo)).collect(Collectors.toList());
         //write youtube desc text file
         PrintWriter writerDesc = new PrintWriter(mainPath, "UTF-8");
@@ -161,7 +158,7 @@ public class PriceDropServiceImpl implements PriceDropService {
             voiceTextDetails.setUrl(priceDropDetail.getSiteUrl());
             voiceDetailsTextList.add(voiceTextDetails);
         }
-        mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + departments.get(0) + "-VoiceText-" + LocalDate.now() + ".txt";
+        mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + department + "-VoiceText-" + LocalDate.now() + ".txt";
         PrintWriter writerVoiceDesc = new PrintWriter(mainPath, "UTF-8");
         for (VoiceTextDetails voiceTextDetail : voiceDetailsTextList) {
             writerVoiceDesc.println(voiceTextDetail.getProductNo() + "."
@@ -180,6 +177,6 @@ public class PriceDropServiceImpl implements PriceDropService {
         writerVoiceDesc.close();
         log.info("Voice details is printed successfully...");
         //insert in designed products table
-        priceDropHelper.insertDesignedProducts(departments);
+        priceDropHelper.insertDesignedProducts();
     }
 }

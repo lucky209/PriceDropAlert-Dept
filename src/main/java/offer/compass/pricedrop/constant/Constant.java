@@ -52,5 +52,5 @@ public class Constant {
     public static final String UTIL_FORWARD_SLASH = "/";
 
     //COUNT CONSTANTS
-    public static int BROWSER_COUNT = 0;
+    public static int PRODUCTS_PROCESSED = 0;
 }

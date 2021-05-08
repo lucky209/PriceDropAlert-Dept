@@ -6,11 +6,7 @@ import java.util.List;
 
 public interface ProductRepo extends JpaRepository<Product, String> {
 
-    List<Product> findByFilterFactorIsNotNullAndDepartmentIsIn(List<String> departments);
-
     List<Product> findByIsPicked(boolean isPicked);
 
-    List<Product> findByProductNoIsNotNullAndDepartmentIsIn(List<String> departments);
-
-    List<Product> findByFilterFactorIsNotNull();
+    List<Product> findByIsSelectedTrue();
 }

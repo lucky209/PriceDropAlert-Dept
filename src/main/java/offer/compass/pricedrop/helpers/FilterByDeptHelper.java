@@ -36,7 +36,7 @@ public class FilterByDeptHelper {
     private List<String> soldOutProductKeys;
 
     @Transactional
-    public void filterByDepartmentsProcess(List<Product> batchEntities, List<String> departments) {
+    public void filterByDepartmentsProcess(List<Product> batchEntities) {
         WebDriver browser = browserHelper.openBrowser(true);
         List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());
         try {
@@ -52,11 +52,7 @@ public class FilterByDeptHelper {
                     log.info("so continuing with next tab");
                 }
             }
-
-            //fetch departments
-            boolean isFlipkart; boolean isDeptFound;
             for (int i = 0; i < tabs.size(); i++) {
-                String prodDept = null; List<String> productDepts;
                 try {
                     browser.switchTo().window(tabs.get(i));
                     Thread.sleep(700);
@@ -65,31 +61,8 @@ public class FilterByDeptHelper {
                         log.info("Found sold out/unavailable product. Moving to next tab");
                         continue;
                     }
-                    isFlipkart = commonHelper.isFlipkartProduct(browser.getCurrentUrl());
-                    if (isFlipkart) {
-                        productDepts = flipkartHelper.getFlipkartDepts(browser);
-                    }
-                    else {
-                        productDepts = amazonHelper.getAmazonDepartments(browser);
-                    }
-                    isDeptFound = productDepts.stream().anyMatch(departments::contains);
-                    if (isDeptFound) {
-                        boolean isDeptCaught = false;
-                        for (String productDept : productDepts) {
-                            for (String department : departments) {
-                                if (productDept.toLowerCase().contains(department.toLowerCase())) {
-                                    prodDept = department;
-                                    isDeptCaught = true;
-                                    break;
-                                }
-                            }
-                            if (isDeptCaught)
-                                break;
-                        }
-                    }
-                    if (prodDept != null) {
-                        this.saveInProductTable(browser, prodDept, batchEntities.get(i), isFlipkart);
-                    }
+                    boolean isFlipkart = commonHelper.isFlipkartProduct(browser.getCurrentUrl());
+                    this.saveInProductTable(browser, batchEntities.get(i), isFlipkart);
                 } catch (Exception ex) {
                     log.info("Exception occurred for the url {} .Exception is {} . So continuing with next tab",
                             browser.getCurrentUrl(), ex.getMessage());
@@ -99,14 +72,13 @@ public class FilterByDeptHelper {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), e.getMessage());
         } finally {
             log.info("::: {} stopping...", Thread.currentThread().getName());
-            Constant.BROWSER_COUNT ++;
-            log.info("Total products processed so far is {}", (Constant.BROWSER_COUNT * tabs.size()));
+            log.info("Total products processed so far is {}", (Constant.PRODUCTS_PROCESSED + tabs.size()));
             browser.quit();
         }
     }
 
     @Transactional
-    void saveInProductTable(WebDriver browser, String dept, Product product, boolean isFlipkart) {
+    void saveInProductTable(WebDriver browser, Product product, boolean isFlipkart) throws Exception {
         String productName;Integer price;
         if (isFlipkart) {
             productName = flipkartHelper.getFlipkartProductName(browser);
@@ -120,7 +92,7 @@ public class FilterByDeptHelper {
         DesignedProduct designedProduct = designedProductRepo.findByProductNameAndSiteUrl(productName,
                 browser.getCurrentUrl());
         if (designedProduct == null) {
-            product.setDepartment(dept);
+            this.setDepartments(browser, product, isFlipkart);
             product.setIsPicked(true);
             product.setUpdatedDate(LocalDateTime.now());
             product.setSiteUrl(browser.getCurrentUrl());
@@ -131,6 +103,46 @@ public class FilterByDeptHelper {
             productRepo.saveAndFlush(product);
         } else {
             log.info("Already designed product found...");
+        }
+    }
+
+    private void setDepartments(WebDriver browser, Product product, boolean isFlipkart) throws Exception {
+        List<String> productDepts;
+        if (isFlipkart) {
+            productDepts = flipkartHelper.getFlipkartDepts(browser);
+        }
+        else {
+            productDepts = amazonHelper.getAmazonDepartments(browser);
+        }
+        if (productDepts.size() > 5) {
+            product.setDepartment(productDepts.get(0));
+            product.setSubDept1(productDepts.get(1));
+            product.setSubDept2(productDepts.get(2));
+            product.setSubDept3(productDepts.get(3));
+            product.setSubDept4(productDepts.get(4));
+            product.setSubDept5(productDepts.get(5));
+        } else if (productDepts.size() == 5) {
+            product.setDepartment(productDepts.get(0));
+            product.setSubDept1(productDepts.get(1));
+            product.setSubDept2(productDepts.get(2));
+            product.setSubDept3(productDepts.get(3));
+            product.setSubDept4(productDepts.get(4));
+        } else if (productDepts.size() == 4) {
+            product.setDepartment(productDepts.get(0));
+            product.setSubDept1(productDepts.get(1));
+            product.setSubDept2(productDepts.get(2));
+            product.setSubDept3(productDepts.get(3));
+        } else if (productDepts.size() == 3) {
+            product.setDepartment(productDepts.get(0));
+            product.setSubDept1(productDepts.get(1));
+            product.setSubDept2(productDepts.get(2));
+        } else if (productDepts.size() == 2) {
+            product.setDepartment(productDepts.get(0));
+            product.setSubDept1(productDepts.get(1));
+        } else if (productDepts.size() == 1) {
+            product.setDepartment(productDepts.get(0));
+        } else {
+            throw new Exception("Cannot fetch dept for " + browser.getCurrentUrl());
         }
     }
 }
