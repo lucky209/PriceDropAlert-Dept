@@ -11,4 +11,6 @@ public interface ProductRepo extends JpaRepository<Product, String> {
     List<Product> findByIsPicked(boolean isPicked);
 
     List<Product> findByProductNoIsNotNullAndDepartmentIsIn(List<String> departments);
+
+    List<Product> findByFilterFactorIsNotNull();
 }

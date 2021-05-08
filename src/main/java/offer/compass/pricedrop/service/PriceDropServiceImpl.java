@@ -76,7 +76,18 @@ public class PriceDropServiceImpl implements PriceDropService {
 
     @Override
     public void downloadImages(List<String> departments) throws InterruptedException {
-        List<Product> productList = productRepo.findByFilterFactorIsNotNullAndDepartmentIsIn(departments);
+        Property property = propertyRepo.findByPropName(PropertyConstants.LOWEST_PRICE_EVER);
+        List<Product> productList;
+        if (property.isEnabled()) {
+            productList = productRepo.findByFilterFactorIsNotNull();
+            if (!productList.isEmpty()) {
+                productList = productList.stream().filter(product -> product.getPrice()
+                        .equals(product.getLowestPrice())).collect(Collectors.toList());
+                log.info("Found lowest price ever products {}", productList.size());
+            }
+        } else {
+            productList = productRepo.findByFilterFactorIsNotNullAndDepartmentIsIn(departments);
+        }
         if (!productList.isEmpty()) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(1);
@@ -89,6 +100,12 @@ public class PriceDropServiceImpl implements PriceDropService {
             }
             pool.shutdown();
             pool.awaitTermination(5, TimeUnit.HOURS);
+        }
+        if (property.isEnabled()) {
+            productList.forEach(product -> {
+                product.setDepartment(departments.get(0));
+                productRepo.saveAndFlush(product);
+            });
         }
         log.info("Completed download images process...");
     }
