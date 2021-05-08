@@ -6,8 +6,8 @@ import offer.compass.pricedrop.constant.Constant;
 import offer.compass.pricedrop.constant.PriceHistoryConstants;
 import offer.compass.pricedrop.constant.PropertyConstants;
 import offer.compass.pricedrop.entity.*;
-import offer.compass.pricedrop.service.FilterByDepartmentsProcess;
 import offer.compass.pricedrop.service.PriceHistoryProcess;
+import offer.compass.pricedrop.service.UpdateSiteDetailsProcess;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -140,15 +140,15 @@ public class PriceDropHelper {
         productRepo.save(product);
     }
 
-    public void filterByDepartments() throws InterruptedException {
-        List<Product> productList = productRepo.findAll();
+    public void updateSiteDetails() throws InterruptedException {
+        List<Product> productList = productRepo.findByIsPickedTrue();
         if (productList.size() > 0) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(
                     Integer.parseInt(propertyRepo.findByPropName(PropertyConstants.MAX_THREADS_COUNT).getPropValue()));
             for (List<Product> batchEntities : Lists.partition(productList,
                     Math.min(productList.size(), searchPerPage))) {
-                Thread thread = new FilterByDepartmentsProcess(batchEntities, filterByDeptHelper);
+                Thread thread = new UpdateSiteDetailsProcess(batchEntities, filterByDeptHelper);
                 pool.execute(thread);
             }
             pool.shutdown();
@@ -158,7 +158,7 @@ public class PriceDropHelper {
     }
 
     public void updatePriceHistoryDetails() throws InterruptedException {
-        List<Product> productList = productRepo.findByIsPicked(true);
+        List<Product> productList = productRepo.findAll();
         if (productList.size() > 0) {
             log.info("Number of deals found from product table is " + productList.size());
             ExecutorService pool = Executors.newFixedThreadPool(

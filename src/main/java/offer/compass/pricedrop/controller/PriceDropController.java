@@ -25,13 +25,6 @@ public class PriceDropController {
         return new AsyncResult<>(true);
     }
 
-    @PostMapping("/price-drop-alert/update-ph-details")
-    public boolean updatePriceHistoryDetails() throws Exception {
-        log.info("::: Request received to updatePriceHistoryDetails");
-        priceDropService.updatePriceHistoryDetails();
-        return true;
-    }
-
     @PostMapping("/price-drop-alert/download-images")
     public boolean downloadImages(@RequestBody String department) throws Exception {
         log.info("Request received to download images of {} products", department);

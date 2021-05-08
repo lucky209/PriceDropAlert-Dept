@@ -79,7 +79,8 @@ public class PriceHistoryHelper {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), ex.getMessage());
         } finally {
             log.info("Quitting the browser of thread {}", Thread.currentThread().getName());
-            log.info("Total products processed so far is {}", (Constant.PRODUCTS_PROCESSED + tabs.size()));
+            Constant.PRODUCTS_PROCESSED += tabs.size();
+            log.info("Total products processed so far is {}", (Constant.PRODUCTS_PROCESSED));
             browser.quit();
         }
     }
@@ -185,6 +186,7 @@ public class PriceHistoryHelper {
                 product.setRatingStar(this.getRatingStar(browser));
                 product.setFilterFactor(filterFactorValue);
                 product.setUpdatedDate(LocalDateTime.now());
+                product.setIsPicked(true);
                 productRepo.saveAndFlush(product);
             }
         }

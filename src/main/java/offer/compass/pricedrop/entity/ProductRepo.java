@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ProductRepo extends JpaRepository<Product, String> {
 
-    List<Product> findByIsPicked(boolean isPicked);
+    List<Product> findByIsPickedTrue();
 
     List<Product> findByIsSelectedTrue();
 }

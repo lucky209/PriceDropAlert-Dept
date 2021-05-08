@@ -11,6 +11,4 @@ public interface PriceDropService {
     void getTextDetails(String department) throws Exception;
 
     void makeCanvaDesign() throws Exception;
-
-    void updatePriceHistoryDetails() throws InterruptedException;
 }

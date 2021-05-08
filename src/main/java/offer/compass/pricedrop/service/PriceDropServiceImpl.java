@@ -59,18 +59,14 @@ public class PriceDropServiceImpl implements PriceDropService {
         priceDropHelper.getPriceDropProducts();
         Thread.sleep(3000);
 
-        // filter the fetched products by departments
-        Constant.PRODUCTS_PROCESSED = 0;
-        log.info("Starting to filter the products by departments...");
-        priceDropHelper.filterByDepartments();
-        Constant.PRODUCTS_PROCESSED = 0;
-    }
-
-    @Override
-    public void updatePriceHistoryDetails() throws InterruptedException {
         // run price history graph process and fetch final products
         Constant.PRODUCTS_PROCESSED = 0;
         priceDropHelper.updatePriceHistoryDetails();
+        Constant.PRODUCTS_PROCESSED = 0;
+
+        // filter the fetched products by departments
+        log.info("Starting to filter the products by departments...");
+        priceDropHelper.updateSiteDetails();
         Constant.PRODUCTS_PROCESSED = 0;
     }
 

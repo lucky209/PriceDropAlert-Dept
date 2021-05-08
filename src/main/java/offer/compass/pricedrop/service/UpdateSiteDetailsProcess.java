@@ -7,12 +7,12 @@ import offer.compass.pricedrop.helpers.FilterByDeptHelper;
 import java.util.List;
 
 @Slf4j
-public class FilterByDepartmentsProcess extends Thread {
+public class UpdateSiteDetailsProcess extends Thread {
 
     private List<Product> batchEntities;
     private FilterByDeptHelper helper;
 
-    public FilterByDepartmentsProcess(List<Product> batchEntities, FilterByDeptHelper helper) {
+    public UpdateSiteDetailsProcess(List<Product> batchEntities, FilterByDeptHelper helper) {
         this.batchEntities = batchEntities;
         this.helper = helper;
     }
@@ -20,6 +20,6 @@ public class FilterByDepartmentsProcess extends Thread {
     @Override
     public void run() {
         log.info("::: " + Thread.currentThread().getName() + " is started...");
-        helper.filterByDepartmentsProcess(batchEntities);
+        helper.updateSiteDetailsProcess(batchEntities);
     }
 }

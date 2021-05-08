@@ -36,7 +36,7 @@ public class FilterByDeptHelper {
     private List<String> soldOutProductKeys;
 
     @Transactional
-    public void filterByDepartmentsProcess(List<Product> batchEntities) {
+    public void updateSiteDetailsProcess(List<Product> batchEntities) {
         WebDriver browser = browserHelper.openBrowser(true);
         List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());
         try {
@@ -72,7 +72,8 @@ public class FilterByDeptHelper {
             log.info("Error occurred for the current url {} .Exception is {}", browser.getCurrentUrl(), e.getMessage());
         } finally {
             log.info("::: {} stopping...", Thread.currentThread().getName());
-            log.info("Total products processed so far is {}", (Constant.PRODUCTS_PROCESSED + tabs.size()));
+            Constant.PRODUCTS_PROCESSED += tabs.size();
+            log.info("Total products processed so far is {}", (Constant.PRODUCTS_PROCESSED));
             browser.quit();
         }
     }
@@ -93,7 +94,7 @@ public class FilterByDeptHelper {
                 browser.getCurrentUrl());
         if (designedProduct == null) {
             this.setDepartments(browser, product, isFlipkart);
-            product.setIsPicked(true);
+//            product.setIsPicked(true);
             product.setUpdatedDate(LocalDateTime.now());
             product.setSiteUrl(browser.getCurrentUrl());
             if (productName != null)
