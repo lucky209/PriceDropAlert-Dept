@@ -94,7 +94,6 @@ public class FilterByDeptHelper {
                 browser.getCurrentUrl());
         if (designedProduct == null) {
             this.setDepartments(browser, product, isFlipkart);
-//            product.setIsPicked(true);
             product.setUpdatedDate(LocalDateTime.now());
             product.setSiteUrl(browser.getCurrentUrl());
             if (productName != null)
