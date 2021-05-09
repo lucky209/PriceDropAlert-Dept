@@ -87,20 +87,24 @@ public class AmazonHelper {
         }
     }
 
-    private void downloadAndSaveAmazonProductImage(WebDriver browser, String imgName, String dept, boolean multiple) throws Exception {
+    private void downloadAndSaveAmazonProductImage(WebDriver browser, String imgName, String dept, boolean multiple) {
         String folderPath = Constant.PATH_TO_SAVE_THUMBNAIL + LocalDate.now() +
                 Constant.UTIL_PATH_SLASH + dept + Constant.UTIL_PATH_SLASH;
         String pathToSave = folderPath + imgName;
         WebElement imgElement;
-        if (multiple)
-            imgElement = browser.findElement(By.id(Constant.THUMBNAIL_ID)).findElement(By.tagName(Constant.TAG_IMAGE));
-        else
-            imgElement = browser.findElement(By.id("imgTagWrapperId")).findElement(By.tagName(Constant.TAG_IMAGE));
-        String imgSrc = imgElement.getAttribute(Constant.TAG_SRC);
-        URL url = new URL(imgSrc);
-        BufferedImage saveImage = ImageIO.read(url);
-        fileHelper.createImageFromBufferedImage(saveImage, pathToSave, folderPath);
-        Thread.sleep(1500);
+        try {
+            if (multiple)
+                imgElement = browser.findElement(By.id(Constant.THUMBNAIL_ID)).findElement(By.tagName(Constant.TAG_IMAGE));
+            else
+                imgElement = browser.findElement(By.id("imgTagWrapperId")).findElement(By.tagName(Constant.TAG_IMAGE));
+            String imgSrc = imgElement.getAttribute(Constant.TAG_SRC);
+            URL url = new URL(imgSrc);
+            BufferedImage saveImage = ImageIO.read(url);
+            fileHelper.createImageFromBufferedImage(saveImage, pathToSave, folderPath);
+            Thread.sleep(1500);
+        } catch (Exception ignored) {
+            //do nothing
+        }
     }
 
     Integer getPrice(WebDriver browser) {

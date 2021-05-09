@@ -101,15 +101,17 @@ public class FilterByDeptHelper {
         //check filter factor
         Property filterFactorProperty = propertyRepo.findByPropName(PropertyConstants.FILTER_FACTOR_THRESHOLD);
         int filterFactorValue = this.getFilterFactor(product.getPricedropFromPrice(), price);
-        if (designedProduct == null && filterFactorValue > Integer.parseInt(filterFactorProperty.getPropValue())) {
-            product.setFilterFactor(filterFactorValue);
-            this.setDepartments(browser, product, isFlipkart);
-            product.setUpdatedDate(LocalDateTime.now());
-            product.setSiteUrl(browser.getCurrentUrl());
-            if (productName != null)
-                product.setProductName(productName);
-            product.setPrice(price);
-            productRepo.saveAndFlush(product);
+        if (designedProduct == null) {
+            if (filterFactorValue > Integer.parseInt(filterFactorProperty.getPropValue())) {
+                product.setFilterFactor(filterFactorValue);
+                this.setDepartments(browser, product, isFlipkart);
+                product.setUpdatedDate(LocalDateTime.now());
+                product.setSiteUrl(browser.getCurrentUrl());
+                if (productName != null)
+                    product.setProductName(productName);
+                product.setPrice(price);
+                productRepo.saveAndFlush(product);
+            }
         } else {
             log.info("Already designed product found...");
         }

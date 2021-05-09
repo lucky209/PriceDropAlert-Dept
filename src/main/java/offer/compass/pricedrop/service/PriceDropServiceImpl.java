@@ -177,6 +177,28 @@ public class PriceDropServiceImpl implements PriceDropService {
         }
         writerVoiceDesc.close();
         log.info("Voice details is printed successfully...");
+        //non designed products text
+        mainPath = Constant.PATH_TO_SAVE_YOUTUBE_DESC + department + "-Non-Designed-" + LocalDate.now() + ".txt";
+        PrintWriter nonDesignedText = new PrintWriter(mainPath, "UTF-8");
+        List<Product> nonDesigned = productRepo.findNonDesignedProducts();
+        log.info("Found {} non designed products", nonDesigned.size());
+        String dept = "";
+        for (Product product : nonDesigned) {
+            if (!dept.equals(product.getDepartment())) {
+                dept = product.getDepartment();
+                nonDesignedText.println(product.getDepartment());
+                nonDesignedText.println("------------------");
+            }
+            nonDesignedText.println(product.getProductName());
+            nonDesignedText.println(product.getSiteUrl());
+            nonDesignedText.println("Current price -- " + product.getPrice());
+            nonDesignedText.println("Price before dropped -- " + product.getPricedropFromPrice());
+            nonDesignedText.println("Price drop date -- " + product.getPricedropFromDate());
+            nonDesignedText.println("Lowest price -- " + product.getLowestPrice());
+            nonDesignedText.println();
+        }
+        nonDesignedText.close();
+        log.info("Non designed details is printed successfully...");
         //insert in designed products table
         priceDropHelper.insertDesignedProducts();
     }
