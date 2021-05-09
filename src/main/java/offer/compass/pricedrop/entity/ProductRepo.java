@@ -12,6 +12,6 @@ public interface ProductRepo extends JpaRepository<Product, String> {
     List<Product> findByIsSelectedTrue();
 
     @Query(value = "select * from pricedropalert.product p where filter_factor " +
-            "is not null and department is not null and (is_selected = false or is_selected is null) ", nativeQuery = true)
+            "is not null and department is not null and (is_selected = false or is_selected is null) order by department ", nativeQuery = true)
     List<Product> findNonDesignedProducts();
 }
