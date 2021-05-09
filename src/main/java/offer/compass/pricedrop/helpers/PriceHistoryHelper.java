@@ -2,11 +2,8 @@ package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
-import offer.compass.pricedrop.constant.PropertyConstants;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.entity.ProductRepo;
-import offer.compass.pricedrop.entity.Property;
-import offer.compass.pricedrop.entity.PropertyRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -19,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,8 +31,6 @@ public class PriceHistoryHelper {
     private CommonHelper commonHelper;
     @Autowired
     private ProductRepo productRepo;
-    @Autowired
-    private PropertyRepo propertyRepo;
 
     public void priceHistoryProcess(List<Product> batchEntities) {
         WebDriver browser = browserHelper.openBrowser(true);
@@ -173,22 +166,17 @@ public class PriceHistoryHelper {
     void updatePriceHistoryGraphDetails(WebDriver browser, Product product,
                                                 String priceDropDate, String priceDropPrice,
                                                 Integer currentPrice) {
-        Property filterFactorProperty = propertyRepo.findByPropName(PropertyConstants.FILTER_FACTOR_THRESHOLD);
         int priceDropFromPrice = commonHelper.convertStringRupeeToInteger(priceDropPrice);
         if (priceDropFromPrice > currentPrice) {
-            int filterFactorValue = this.getFilterFactor(priceDropFromPrice, currentPrice);
-            if (filterFactorValue > Integer.parseInt(filterFactorProperty.getPropValue())) {
-                product.setPricedropFromPrice(priceDropFromPrice);
-                product.setPricedropFromDate(this.convertPhDateToLocalDate(priceDropDate));
-                product.setDropChances(this.getDropChances(browser));
-                product.setHighestPrice(this.getHighestPrice(browser));
-                product.setLowestPrice(this.getLowestPrice(browser));
-                product.setRatingStar(this.getRatingStar(browser));
-                product.setFilterFactor(filterFactorValue);
-                product.setUpdatedDate(LocalDateTime.now());
-                product.setIsPicked(true);
-                productRepo.saveAndFlush(product);
-            }
+            product.setPricedropFromPrice(priceDropFromPrice);
+            product.setPricedropFromDate(this.convertPhDateToLocalDate(priceDropDate));
+            product.setDropChances(this.getDropChances(browser));
+            product.setHighestPrice(this.getHighestPrice(browser));
+            product.setLowestPrice(this.getLowestPrice(browser));
+            product.setRatingStar(this.getRatingStar(browser));
+            product.setUpdatedDate(LocalDateTime.now());
+            product.setIsPicked(true);
+            productRepo.saveAndFlush(product);
         }
     }
 
@@ -230,12 +218,5 @@ public class PriceHistoryHelper {
         }
         log.info("Cannot fetch rating star for the url {}", browser.getCurrentUrl());
         return null;
-    }
-
-    private Integer getFilterFactor(int priceDropFromPrice, int priceDropToPrice) {
-        double doubleDiff = ((double) priceDropFromPrice - (double) priceDropToPrice)/ (double) priceDropFromPrice;
-        doubleDiff = doubleDiff * 100;
-        BigDecimal bd = new BigDecimal(doubleDiff).setScale(2, RoundingMode.HALF_EVEN);
-        return (int) bd.doubleValue();
     }
 }

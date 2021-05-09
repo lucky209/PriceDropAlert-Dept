@@ -25,6 +25,20 @@ public class PriceDropController {
         return new AsyncResult<>(true);
     }
 
+    @PostMapping("/price-drop-alert/update-ph-details")
+    public Future<Boolean> updatePHDetails() throws Exception {
+        log.info("::: Request received to get price drop alert products");
+        priceDropService.updatePHDetails();
+        return new AsyncResult<>(true);
+    }
+
+    @PostMapping("/price-drop-alert/update-site-details")
+    public Future<Boolean> updateSiteDetails() throws Exception {
+        log.info("::: Request received to get price drop alert products");
+        priceDropService.updateSiteDetails();
+        return new AsyncResult<>(true);
+    }
+
     @PostMapping("/price-drop-alert/download-images")
     public boolean downloadImages(@RequestBody String department) throws Exception {
         log.info("Request received to download images of {} products", department);

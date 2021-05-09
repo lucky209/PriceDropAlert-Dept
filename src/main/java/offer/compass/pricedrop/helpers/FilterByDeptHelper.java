@@ -2,16 +2,16 @@ package offer.compass.pricedrop.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
-import offer.compass.pricedrop.entity.DesignedProduct;
-import offer.compass.pricedrop.entity.DesignedProductRepo;
-import offer.compass.pricedrop.entity.Product;
-import offer.compass.pricedrop.entity.ProductRepo;
+import offer.compass.pricedrop.constant.PropertyConstants;
+import offer.compass.pricedrop.entity.*;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,6 +31,8 @@ public class FilterByDeptHelper {
     private ProductRepo productRepo;
     @Autowired
     private DesignedProductRepo designedProductRepo;
+    @Autowired
+    private PropertyRepo propertyRepo;
 
     @Value("#{'${sold.out.product.keys}'.split(',')}")
     private List<String> soldOutProductKeys;
@@ -89,17 +91,24 @@ public class FilterByDeptHelper {
             productName = amazonHelper.getAmazonProductName(browser);
             price = amazonHelper.getPrice(browser);
         }
+        //price
+        if (price == null) {
+            price = product.getPrice();
+        }
         //check if product already exists
         DesignedProduct designedProduct = designedProductRepo.findByProductNameAndSiteUrl(productName,
                 browser.getCurrentUrl());
-        if (designedProduct == null) {
+        //check filter factor
+        Property filterFactorProperty = propertyRepo.findByPropName(PropertyConstants.FILTER_FACTOR_THRESHOLD);
+        int filterFactorValue = this.getFilterFactor(product.getPricedropFromPrice(), price);
+        if (designedProduct == null && filterFactorValue > Integer.parseInt(filterFactorProperty.getPropValue())) {
+            product.setFilterFactor(filterFactorValue);
             this.setDepartments(browser, product, isFlipkart);
             product.setUpdatedDate(LocalDateTime.now());
             product.setSiteUrl(browser.getCurrentUrl());
             if (productName != null)
                 product.setProductName(productName);
-            if (price != null)
-                product.setPrice(price);
+            product.setPrice(price);
             productRepo.saveAndFlush(product);
         } else {
             log.info("Already designed product found...");
@@ -144,5 +153,12 @@ public class FilterByDeptHelper {
         } else {
             throw new Exception("Cannot fetch dept for " + browser.getCurrentUrl());
         }
+    }
+
+    private Integer getFilterFactor(int priceDropFromPrice, int priceDropToPrice) {
+        double doubleDiff = ((double) priceDropFromPrice - (double) priceDropToPrice)/ (double) priceDropFromPrice;
+        doubleDiff = doubleDiff * 100;
+        BigDecimal bd = new BigDecimal(doubleDiff).setScale(2, RoundingMode.HALF_EVEN);
+        return (int) bd.doubleValue();
     }
 }
