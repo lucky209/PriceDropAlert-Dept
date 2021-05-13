@@ -93,19 +93,17 @@ public class PriceDropHelper {
                         PriceHistoryConstants.PRODUCT_NAME_CSS_SELECTOR));
                 if (elementProductName != null) {
                     productName = elementProductName.getText().trim();
-                    if (!productName.toLowerCase().contains("amazon")) {
-                        url = elementProductName.findElement(By.tagName(Constant.TAG_ANCHOR))
+                    url = elementProductName.findElement(By.tagName(Constant.TAG_ANCHOR))
+                            .getAttribute(Constant.ATTRIBUTE_HREF);
+                    if (url.contains(PriceHistoryConstants.AMAZON_URL) ||
+                            url.contains(PriceHistoryConstants.FLIPKART_URL)) {
+                        price = commonHelper.convertStringRupeeToInteger(productElements.get(i).findElement(
+                                By.className(PriceHistoryConstants.PRICE_CLASS)).getText().trim());
+                        priceHistoryUrl = productElements.get(i).findElement(By.className(
+                                PriceHistoryConstants.PRICE_HISTORY_URL_CLASS))
                                 .getAttribute(Constant.ATTRIBUTE_HREF);
-                        if (url.contains(PriceHistoryConstants.AMAZON_URL) ||
-                                url.contains(PriceHistoryConstants.FLIPKART_URL)) {
-                            price = commonHelper.convertStringRupeeToInteger(productElements.get(i).findElement(
-                                    By.className(PriceHistoryConstants.PRICE_CLASS)).getText().trim());
-                            priceHistoryUrl = productElements.get(i).findElement(By.className(
-                                    PriceHistoryConstants.PRICE_HISTORY_URL_CLASS))
-                                    .getAttribute(Constant.ATTRIBUTE_HREF);
-                            this.saveInProductTable(productName, url, price, priceHistoryUrl);
-                            saveCount++;
-                        }
+                        this.saveInProductTable(productName, url, price, priceHistoryUrl);
+                        saveCount++;
                     }
                 }
             }

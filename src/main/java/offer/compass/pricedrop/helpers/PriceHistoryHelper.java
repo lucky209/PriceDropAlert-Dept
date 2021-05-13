@@ -126,7 +126,7 @@ public class PriceHistoryHelper {
     }
 
     private boolean loadCurrentPriceElement(WebDriver browser) throws InterruptedException {
-        WebDriverWait wait = new WebDriverWait(browser, 15);
+        WebDriverWait wait = new WebDriverWait(browser, 8);
         WebElement cpElement = wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.id("currentPrice")));
         int count = 1;
