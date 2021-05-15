@@ -4,6 +4,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.constant.Constant;
 import offer.compass.pricedrop.constant.PropertyConstants;
+import offer.compass.pricedrop.entity.Property;
 import offer.compass.pricedrop.entity.PropertyRepo;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -23,11 +24,23 @@ public class BrowserHelper {
     @Autowired
     private PropertyRepo propertyRepo;
 
-    WebDriver openBrowser(boolean isMaximize) {
+    WebDriver openBrowser(boolean isMaximize) throws InterruptedException {
+        Property property = propertyRepo.findByPropName(PropertyConstants.INTERNET_AVAILABLE);
+        while (!property.isEnabled()) {
+            property = propertyRepo.findByPropName(PropertyConstants.INTERNET_AVAILABLE);
+            log.info("Waiting for 5 minutes as internet is not available");
+            Thread.sleep(60000 * 5);
+        }
         return this.openChromeBrowser(isMaximize);
     }
 
     WebDriver openBrowser(boolean isMaximize, String url) throws InterruptedException {
+        Property property = propertyRepo.findByPropName(PropertyConstants.INTERNET_AVAILABLE);
+        while (!property.isEnabled()) {
+            property = propertyRepo.findByPropName(PropertyConstants.INTERNET_AVAILABLE);
+            log.info("Waiting for 5 minutes as internet is not available");
+            Thread.sleep(60000 * 5);
+        }
         WebDriver browser = this.openChromeBrowser(isMaximize);
         browser.get(url);
         Thread.sleep(3000);

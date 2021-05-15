@@ -38,7 +38,7 @@ public class FilterByDeptHelper {
     private List<String> soldOutProductKeys;
 
     @Transactional
-    public void updateSiteDetailsProcess(List<Product> batchEntities) {
+    public void updateSiteDetailsProcess(List<Product> batchEntities) throws InterruptedException {
         WebDriver browser = browserHelper.openBrowser(true);
         List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());
         try {

@@ -172,7 +172,7 @@ public class PriceDropHelper {
         log.info("Completed the updatePriceHistoryDetails process...");
     }
 
-    public void downloadImagesProcess(List<Product> batchEntities, String dept, int imgCount) {
+    public void downloadImagesProcess(List<Product> batchEntities, String dept, int imgCount) throws InterruptedException {
         //open tabs
         WebDriver browser = browserHelper.openBrowser(true);
         List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());
@@ -203,6 +203,7 @@ public class PriceDropHelper {
                 }
                 batchEntities.get(i).setProductNo(imgCount+1);
                 productRepo.save(batchEntities.get(i));
+                log.info("Downloaded and saved product number {}", (imgCount+1));
             } catch (Exception ex) {
                 log.info("Exception occurred for the url {}. Exception is {}", browser.getCurrentUrl(), ex.getMessage());
                 log.info("Continuing with next tab...");

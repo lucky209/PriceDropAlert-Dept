@@ -32,7 +32,7 @@ public class PriceHistoryHelper {
     @Autowired
     private ProductRepo productRepo;
 
-    public void priceHistoryProcess(List<Product> batchEntities) {
+    public void priceHistoryProcess(List<Product> batchEntities) throws InterruptedException {
         WebDriver browser = browserHelper.openBrowser(true);
         List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());
         try {

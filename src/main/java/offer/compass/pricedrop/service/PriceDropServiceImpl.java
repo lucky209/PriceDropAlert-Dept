@@ -137,7 +137,7 @@ public class PriceDropServiceImpl implements PriceDropService {
         for (Product priceDropDetail : youtubeDescList) {
             if (priceDropDetail.getShortenUrl() != null) {
                 writerDesc.println(priceDropDetail.getProductNo() + ". " + priceDropDetail.getProductName());
-                writerDesc.println("Url -- " + priceDropDetail.getShortenUrl());
+                writerDesc.println("Link -- " + priceDropDetail.getShortenUrl());
                 writerDesc.println();
             }
         }

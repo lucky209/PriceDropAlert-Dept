@@ -22,7 +22,7 @@ public class ShortenUrlHelper {
     private ProductRepo productRepo;
 
     @Transactional
-    public void shortenUrlProcess(List<Product> batchEntities) {
+    public void shortenUrlProcess(List<Product> batchEntities) throws InterruptedException {
         //open tabs
         WebDriver browser = browserHelper.openBrowser(true);
         List<String> tabs = browserHelper.openNTabs(browser, batchEntities.size());

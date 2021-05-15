@@ -1,5 +1,6 @@
 package offer.compass.pricedrop.service;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import offer.compass.pricedrop.entity.Product;
 import offer.compass.pricedrop.helpers.PriceHistoryHelper;
@@ -17,6 +18,7 @@ public class PriceHistoryProcess extends Thread {
         this.helper = helper;
     }
 
+    @SneakyThrows
     @Override
     public void run() {
         log.info("::: " + Thread.currentThread().getName() + " is started...");
