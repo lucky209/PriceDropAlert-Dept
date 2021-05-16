@@ -194,7 +194,7 @@ public class PriceDropServiceImpl implements PriceDropService {
             nonDesignedText.println("Current price -- " + product.getPrice());
             nonDesignedText.println("Price before dropped -- " + product.getPricedropFromPrice());
             nonDesignedText.println("Price drop date -- " + product.getPricedropFromDate());
-            nonDesignedText.println("Lowest price -- " + product.getLowestPrice());
+            nonDesignedText.println("Lowest price ever -- " + product.getLowestPrice());
             nonDesignedText.println();
         }
         nonDesignedText.close();
